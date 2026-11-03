@@ -90,6 +90,9 @@ Route::middleware(['staff'])->name('api.')->group(function () {
         Route::post('/doctor/update-patient', [\App\Http\Controllers\Api\PatientController::class, 'updateDoctorNotes'])->name('doctor.update-patient')->middleware('role:DOCTOR_ANY,EXECUTIVE');
         Route::post('/patients/mark-done', [\App\Http\Controllers\Api\PatientController::class, 'markDone'])->name('patients.mark-done')->middleware('role:REGISTRAR');
         Route::post('/patients/return', [\App\Http\Controllers\Api\PatientController::class, 'returnPatient'])->name('patients.return')->middleware('role:DOCTOR,EXECUTIVE');
+        Route::post('/patients/registrar-return', [\App\Http\Controllers\Api\PatientController::class, 'registrarReturnPatient'])->name('patients.registrar-return')->middleware('role:REGISTRAR');
+        Route::post('/patients/approve', [\App\Http\Controllers\Api\PatientController::class, 'approvePatient'])->name('patients.approve')->middleware('role:DOCTOR,EXECUTIVE');
+        Route::post('/patients/disqualify', [\App\Http\Controllers\Api\PatientController::class, 'disqualifyPatient'])->name('patients.disqualify')->middleware('role:DOCTOR,EXECUTIVE');
         Route::get('/logs/registrar', [\App\Http\Controllers\Api\LogController::class, 'registrar'])->name('logs.registrar')->middleware('role:REGISTRAR,DOCTOR,EXECUTIVE');
         Route::get('/logs/doctor', [\App\Http\Controllers\Api\LogController::class, 'doctors'])->name('logs.doctor')->middleware('role:REGISTRAR,DOCTOR_ANY,EXECUTIVE');
         Route::post('/password/change', [\App\Http\Controllers\Auth\PasswordController::class, 'changePassword'])->name('password.change');

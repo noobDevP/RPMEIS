@@ -19,6 +19,43 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Auth\TwoFactorController;
 
+// Database Connection Diagnostic Endpoint
+Route::get('/db-diagnostic', function () {
+    $result = [
+        'database_configured' => config('database.connections.mysql.database'),
+        'username_configured' => config('database.connections.mysql.username'),
+        'host_configured' => config('database.connections.mysql.host'),
+        'connection_status' => 'unknown',
+        'error' => null,
+        'tables_found' => [],
+        'user_table_count' => null,
+        'admin_credential_count' => null,
+    ];
+
+    try {
+        \Illuminate\Support\Facades\DB::connection()->getPdo();
+        $result['connection_status'] = 'CONNECTED_SUCCESSFULLY';
+
+        $tables = \Illuminate\Support\Facades\DB::select('SHOW TABLES');
+        foreach ($tables as $t) {
+            $arr = (array) $t;
+            $result['tables_found'][] = array_values($arr)[0];
+        }
+
+        if (in_array('user_table', $result['tables_found'], true)) {
+            $result['user_table_count'] = \Illuminate\Support\Facades\DB::table('user_table')->count();
+        }
+        if (in_array('admin_credential', $result['tables_found'], true)) {
+            $result['admin_credential_count'] = \Illuminate\Support\Facades\DB::table('admin_credential')->count();
+        }
+    } catch (\Throwable $e) {
+        $result['connection_status'] = 'CONNECTION_FAILED';
+        $result['error'] = $e->getMessage();
+    }
+
+    return response()->json($result, $result['connection_status'] === 'CONNECTED_SUCCESSFULLY' ? 200 : 500);
+});
+
 // 2FA Routes
 Route::get('/2fa/challenge', [TwoFactorController::class, 'challenge'])->name('2fa.challenge');
 Route::post('/2fa/verify', [TwoFactorController::class, 'verify'])->name('2fa.verify')->middleware('throttle:login');

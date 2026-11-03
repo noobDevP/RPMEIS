@@ -163,7 +163,7 @@
     </p>
 
     <div class="qr-container">
-        {!! $qrCode !!}
+        {!! $qrCode ?? $qrCodeSvg ?? '' !!}
         <div class="secret-code">
             {{ $secret }}
         </div>

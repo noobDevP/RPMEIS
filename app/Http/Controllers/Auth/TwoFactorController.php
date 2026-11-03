@@ -168,6 +168,7 @@ class TwoFactorController extends Controller
 
         return view('auth.2fa_setup', [
             'secret' => $secret,
+            'qrCode' => $qrCodeSvg,
             'qrCodeSvg' => $qrCodeSvg,
         ]);
     }

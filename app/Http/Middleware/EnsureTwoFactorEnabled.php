@@ -11,7 +11,7 @@ class EnsureTwoFactorEnabled
 {
     public function handle(Request $request, Closure $next)
     {
-        $allowedRoutes = ['2fa.settings', '2fa.enable', '2fa.disable', '2fa.recovery-codes', '2fa.recovery-codes.regenerate', '2fa.recovery', '2fa.recovery.verify', 'logout', 'login', 'admin.login', 'login.store'];
+        $allowedRoutes = ['2fa.challenge', '2fa.verify', '2fa.settings', '2fa.enable', '2fa.disable', '2fa.recovery-codes', '2fa.recovery-codes.regenerate', '2fa.recovery', '2fa.recovery.verify', 'logout', 'login', 'admin.login', 'login.store'];
         
         if (in_array($request->route()?->getName(), $allowedRoutes, true)) {
             return $next($request);

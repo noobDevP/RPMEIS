@@ -1,0 +1,21 @@
+<?php
+
+namespace App\Http\Requests\Admin;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class UpdateCredentialRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'admin_username' => ['required', 'string', 'max:255'],
+            'admin_password' => ['required', 'string', 'min:4'],
+        ];
+    }
+}

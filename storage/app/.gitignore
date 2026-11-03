@@ -1,0 +1,6 @@
+*
+!private/
+!public/
+!*.pdf
+!.gitignore
+

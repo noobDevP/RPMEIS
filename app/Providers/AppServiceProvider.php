@@ -23,19 +23,19 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Login throttle: 10 attempts per minute, keyed by username+IP so one user
-        // cannot lock out another user on the same shared network (e.g. office LAN).
-        // A single login attempt uses /auth/lookup-display-name + /login (2 hits),
-        // so 10 allows ~5 real attempts before triggering protection.
+        // Login throttle: Configurable via AUTH_THROTTLE_LOGIN_PER_MINUTE (default 10).
+        // Can be increased during penetration testing / VAPT assessments in .env
+        // (e.g. AUTH_THROTTLE_LOGIN_PER_MINUTE=120) to prevent 429 scanner lockouts.
         RateLimiter::for('login', function (Request $request) {
+            $limit = (int) env('AUTH_THROTTLE_LOGIN_PER_MINUTE', 10);
             $username = strtolower(trim((string) $request->input('username', '')));
-            return Limit::perMinute(10)->by($username . '|' . $request->ip());
+            return Limit::perMinute($limit)->by($username . '|' . $request->ip());
         });
 
-        // Display name lookup is a non-destructive username hint — use a lenient
-        // limiter so it does not eat into the stricter login attempt budget.
+        // Display name lookup throttle: Configurable via AUTH_THROTTLE_LOOKUP_PER_MINUTE (default 20).
         RateLimiter::for('lookup', function (Request $request) {
-            return Limit::perMinute(20)->by($request->ip());
+            $limit = (int) env('AUTH_THROTTLE_LOOKUP_PER_MINUTE', 20);
+            return Limit::perMinute($limit)->by($request->ip());
         });
 
         Paginator::useBootstrapFive();

@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
     * {
       margin: 0;
@@ -253,7 +253,7 @@
       <p>Sign in to your staff account</p>
     </div>
 
-    <!-- login form -->
+    {{-- login form --}}
     <form action="{{ route('login') }}" method="post" autocomplete="off">
       @csrf
       
@@ -261,14 +261,14 @@
           <div class="error-message">{{ $message }}</div>
       @enderror
 
-      <!-- username -->
+      {{-- username field --}}
       <div class="input-group">
         <label for="username">Username</label>
         <input type="text" name="username" id="username" class="input-field" placeholder="Enter your username" value="{{ old('username') }}" required oninput="this.value = this.value.toUpperCase();" />
         <i class="fas fa-user input-icon"></i>
       </div>
 
-      <!-- password -->
+      {{-- password field --}}
       <div class="input-group">
         <label for="password">Password</label>
         <input type="password" name="password" id="password" class="input-field" placeholder="••••••••" required />
@@ -277,7 +277,7 @@
 
       <input type="hidden" name="user_username" id="user_username" readonly>
 
-      <!-- login button -->
+      {{-- login button --}}
       <button type="submit" class="login-btn">
         <span>Log In</span>
         <i class="fas fa-arrow-right"></i>

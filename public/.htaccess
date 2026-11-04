@@ -33,3 +33,18 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+<IfModule mod_headers.c>
+    # Security headers applied to all responses (including static files like images and robots.txt)
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Header always set X-Frame-Options "DENY"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(self), microphone=(), geolocation=()"
+
+    # Remove overly permissive CORS headers on static assets
+    Header unset Access-Control-Allow-Origin
+    Header always unset Access-Control-Allow-Origin
+    Header unset Access-Control-Allow-Methods
+    Header always unset Access-Control-Allow-Methods
+</IfModule>

@@ -15,10 +15,16 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(\App\Http\Middleware\SecurityHeadersMiddleware::class);
         
-        $middleware->web(append: [
-            \App\Http\Middleware\SingleSessionMiddleware::class,
-            \App\Http\Middleware\EnsureTwoFactorEnabled::class,
-        ]);
+        $middleware->web(
+            replace: [
+                \Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class => \App\Http\Middleware\PreventRequestForgery::class,
+                \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class => \App\Http\Middleware\PreventRequestForgery::class,
+            ],
+            append: [
+                \App\Http\Middleware\SingleSessionMiddleware::class,
+                \App\Http\Middleware\EnsureTwoFactorEnabled::class,
+            ],
+        );
         $middleware->api(prepend: [
             \Illuminate\Cookie\Middleware\EncryptCookies::class,
             \Illuminate\Session\Middleware\StartSession::class,

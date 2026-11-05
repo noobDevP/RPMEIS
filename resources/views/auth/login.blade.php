@@ -239,7 +239,7 @@
     {{-- brand: RPMEIS --}}
     <div class="brand">
       <div class="brand-icon">
-        <img src="{{ asset('images/Visayas.png') }}" alt="RPMEIS Logo" />
+        <img src="{{ asset('images/Visayas.png') }}?v=2" alt="RPMEIS Logo" />
       </div>
       <div class="brand-name">RPMEIS</div>
     </div>
@@ -287,29 +287,6 @@
     </div>
   </div>
 
-  <script>
-    document.getElementById('password').addEventListener('input', function() {
-        const username = document.getElementById('username').value;
-        const password = this.value;
-
-        if (!username || !password) {
-            return;
-        }
-
-        fetch('{{ route('auth.lookup-display-name') }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            },
-            body: 'username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password),
-        })
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById('user_username').value = data;
-        })
-        .catch(error => console.error('Error:', error));
-    });
-  </script>
+  <script src="{{ asset('js/login-lookup.js') }}?v=1"></script>
 </body>
 </html>

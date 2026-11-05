@@ -32,17 +32,13 @@
         Header set Cache-Control "max-age=86400, public, must-revalidate"
     </FilesMatch>
 
-    # Remove overly permissive CORS headers on static assets
-    <FilesMatch "\.(png|jpe?g|gif|ico|svg|webp)$">
-        Header unset Access-Control-Allow-Origin
-        Header always unset Access-Control-Allow-Origin
-        Header unset Access-Control-Allow-Methods
-        Header always unset Access-Control-Allow-Methods
+    # Restrict CORS headers to application origin on static assets to prevent Cross-Domain Misconfiguration
+    <FilesMatch "\.(png|jpe?g|gif|ico|svg|webp|js|css|xml|txt)$">
+        Header set Access-Control-Allow-Origin "https://lawngreen-lyrebird-493319.hostingersite.com"
+        Header always set Access-Control-Allow-Origin "https://lawngreen-lyrebird-493319.hostingersite.com"
+        Header set Access-Control-Allow-Methods "GET, OPTIONS"
+        Header always set Access-Control-Allow-Methods "GET, OPTIONS"
     </FilesMatch>
-    Header unset Access-Control-Allow-Origin
-    Header always unset Access-Control-Allow-Origin
-    Header unset Access-Control-Allow-Methods
-    Header always unset Access-Control-Allow-Methods
 </IfModule>
 
 Options -Indexes

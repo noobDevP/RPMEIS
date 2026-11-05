@@ -267,7 +267,7 @@
 <main class="login-wrapper">
   {{-- Brand Header --}}
   <header class="brand">
-    <img src="{{ asset('images/Visayas.png') }}" alt="RPMEIS Logo" class="brand-logo" />
+    <img src="{{ asset('images/Visayas.png') }}?v=2" alt="RPMEIS Logo" class="brand-logo" />
     <h1>RPMEIS <span>·</span> <span class="brand-subtitle">Admin</span></h1>
   </header>
 

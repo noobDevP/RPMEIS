@@ -28,16 +28,11 @@ class SecurityHeadersMiddleware
             $response->header('Referrer-Policy', 'strict-origin-when-cross-origin');
             $response->header('Permissions-Policy', 'camera=(self), microphone=(), geolocation=()');
 
-            // Cache-Control: prevent caching sensitive dynamic pages & authentication responses
             if (!$request->is('images/*', 'css/*', 'js/*', '*.png', '*.jpg', '*.ico')) {
                 $response->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
                 $response->header('Pragma', 'no-cache');
             }
 
-            // Robust Content-Security-Policy with granular directives
-            // - Defines frame-ancestors and form-action to prevent clickjacking & form hijacking
-            // - Restricts img-src to self, data, and blob (no wildcards)
-            // - Removes unsafe-eval completely
             $cspDirectives = [
                 "default-src 'self'",
                 "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://ajax.googleapis.com",
@@ -57,9 +52,28 @@ class SecurityHeadersMiddleware
         if (method_exists($response, 'headers')) {
             $response->headers->remove('X-Powered-By');
             $response->headers->remove('Server');
+
+            if ($response->headers instanceof \Symfony\Component\HttpFoundation\ResponseHeaderBag) {
+                foreach ($response->headers->getCookies() as $cookie) {
+                    if (!$cookie->isHttpOnly()) {
+                        $response->headers->setCookie(
+                            new \Symfony\Component\HttpFoundation\Cookie(
+                                $cookie->getName(),
+                                $cookie->getValue(),
+                                $cookie->getExpiresTime(),
+                                $cookie->getPath(),
+                                $cookie->getDomain(),
+                                $cookie->isSecure(),
+                                true,
+                                $cookie->isRaw(),
+                                $cookie->getSameSite()
+                            )
+                        );
+                    }
+                }
+            }
         }
 
         return $response;
     }
 }
-

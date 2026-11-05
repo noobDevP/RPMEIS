@@ -5,8 +5,18 @@
     RewriteRule ^(app|bootstrap|config|database|resources|routes|storage|tests|vendor)(/|$) - [F,L]
     RewriteRule ^(\.env|\.git|composer\.(json|lock)|package(-lock)?\.json|artisan|vite\.config\.js) - [F,L]
 
+    # Block direct client requests containing /public prefix to prevent directory exposure and scanner fuzzing
+    RewriteCond %{THE_REQUEST} \s/+public[/\s?] [NC]
+    RewriteRule ^ - [F,L]
+
     # Block bare directory requests from triggering Apache mod_dir redirect inflation
-    RewriteRule ^(images|uploads|blank|tutorial)/?$ - [F,L]
+    RewriteRule ^(images|uploads|blank|tutorial|js|css|public)/?$ - [F,L]
+    RewriteRule ^public/(images|uploads|blank|tutorial|js|css)/?$ - [F,L]
+
+    # Discard query strings on static assets to prevent scanners from fuzzing static file versions
+    RewriteCond %{QUERY_STRING} .
+    RewriteCond %{REQUEST_URI} \.(js|css|png|jpe?g|gif|ico|svg|webp|txt|xml)$ [NC]
+    RewriteRule ^(.*)$ $1? [L]
 
     # Route all requests cleanly to the public/ directory
     RewriteCond %{REQUEST_URI} !^/public/
@@ -14,15 +24,24 @@
 </IfModule>
 
 <IfModule mod_headers.c>
-    # Security headers for root requests & static fallback
+    # Security headers for root requests & static fallback (set on both tables for 200 OK and error responses)
+    Header set X-Content-Type-Options "nosniff"
     Header always set X-Content-Type-Options "nosniff"
+    Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
     Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Header set X-Frame-Options "DENY"
     Header always set X-Frame-Options "DENY"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set Permissions-Policy "camera=(self), microphone=(), geolocation=()"
     Header always set Permissions-Policy "camera=(self), microphone=(), geolocation=()"
 
-    # Caching directives for static sitemaps, robots, and xml
+    # Caching directives and security headers for static sitemaps, robots, and xml
     <FilesMatch "\.(xml|txt)$">
+        Header set X-Content-Type-Options "nosniff"
+        Header always set X-Content-Type-Options "nosniff"
+        Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
         Header set Cache-Control "max-age=86400, public, must-revalidate"
     </FilesMatch>
 

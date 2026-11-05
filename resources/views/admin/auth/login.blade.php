@@ -68,6 +68,6 @@
   </footer>
 </main>
 
-  <script src="{{ asset('js/admin-login.js') }}?v=1"></script>
+  <script src="{{ asset('js/admin-login.js') }}"></script>
 </body>
 </html>

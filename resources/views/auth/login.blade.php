@@ -67,6 +67,6 @@
     </div>
   </div>
 
-  <script src="{{ asset('js/login-lookup.js') }}?v=1"></script>
+  <script src="{{ asset('js/login-lookup.js') }}"></script>
 </body>
 </html>

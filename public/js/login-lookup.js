@@ -7,6 +7,10 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
+    usernameInput.addEventListener('input', function() {
+        this.value = this.value.toUpperCase();
+    });
+
     passwordInput.addEventListener('input', function() {
         var username = usernameInput.value;
         var password = this.value;

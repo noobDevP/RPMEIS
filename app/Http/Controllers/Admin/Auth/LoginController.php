@@ -32,8 +32,13 @@ class LoginController extends Controller
         );
 
         if (! $admin) {
+            $username = (string) $request->input('username', '');
+            $safeInput = (!str_contains($username, '/') && !str_contains($username, '\\') && !str_contains($username, '..'))
+                ? ['username' => $username]
+                : [];
+
             return back()
-                ->withInput($request->only('username'))
+                ->withInput($safeInput)
                 ->withErrors(['login' => 'Invalid username or password!']);
         }
 

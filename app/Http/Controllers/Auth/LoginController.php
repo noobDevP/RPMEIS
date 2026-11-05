@@ -47,14 +47,24 @@ class LoginController extends Controller
         );
 
         if (! $user) {
+            $username = (string) $request->input('username', '');
+            $safeInput = (!str_contains($username, '/') && !str_contains($username, '\\') && !str_contains($username, '..'))
+                ? ['username' => $username]
+                : [];
+
             return back()
-                ->withInput($request->only('username'))
+                ->withInput($safeInput)
                 ->withErrors(['login' => 'Invalid username or password.']);
         }
 
         if (! $user->isActive()) {
+            $username = (string) $request->input('username', '');
+            $safeInput = (!str_contains($username, '/') && !str_contains($username, '\\') && !str_contains($username, '..'))
+                ? ['username' => $username]
+                : [];
+
             return back()
-                ->withInput($request->only('username'))
+                ->withInput($safeInput)
                 ->withErrors(['login' => 'Account is inactive. Contact admin.']);
         }
 
@@ -95,9 +105,14 @@ class LoginController extends Controller
 
     public function lookupDisplayName(Request $request): Response
     {
+        $rawUsername = (string) $request->input('username', '');
+        if (str_contains($rawUsername, '/') || str_contains($rawUsername, '\\') || str_contains($rawUsername, '..')) {
+            return response('Invalid username', 400, ['Content-Type' => 'text/plain']);
+        }
+
         $request->validate([
-            'username' => ['required', 'string'],
-            'password' => ['required', 'string'],
+            'username' => ['required', 'string', 'max:50', 'regex:/^[a-zA-Z0-9_\-\.\@\s]+$/'],
+            'password' => ['required', 'string', 'max:255'],
         ]);
 
         $displayName = $this->staffAuth->lookupDisplayName(

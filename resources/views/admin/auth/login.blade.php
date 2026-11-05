@@ -43,7 +43,7 @@
       </label>
       <div class="input-wrap">
         <i class="fas fa-user-shield"></i>
-        <input type="text" name="username" id="adminUsername" placeholder="Enter admin username" value="{{ old('username') }}" required oninput="this.value = this.value.toUpperCase();" />
+        <input type="text" name="username" id="adminUsername" placeholder="Enter admin username" value="{{ old('username') }}" required />
       </div>
     </div>
     
@@ -68,5 +68,6 @@
   </footer>
 </main>
 
+  <script src="{{ asset('js/admin-login.js') }}?v=1"></script>
 </body>
 </html>

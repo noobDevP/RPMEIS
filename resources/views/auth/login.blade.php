@@ -41,7 +41,7 @@
       {{-- username field --}}
       <div class="input-group">
         <label for="username">Username</label>
-        <input type="text" name="username" id="username" class="input-field" placeholder="Enter your username" value="{{ old('username') }}" required oninput="this.value = this.value.toUpperCase();" />
+        <input type="text" name="username" id="username" class="input-field" placeholder="Enter your username" value="{{ old('username') }}" required />
         <i class="fas fa-user input-icon"></i>
       </div>
 

@@ -5,12 +5,10 @@
 
     RewriteEngine On
 
-    # Redirect HTTP to HTTPS (required for camera/getUserMedia secure context)
-    # Skip for localhost so local dev still works without a cert
+    # Let PHP emit a bodyless HTTPS redirect before Laravel or static files are served.
     RewriteCond %{HTTPS} off
-    RewriteCond %{HTTP_HOST} !^localhost [NC]
-    RewriteCond %{HTTP_HOST} !^127\.0\.0\.1
-    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1|\[::1\])(:[0-9]+)?$ [NC]
+    RewriteRule ^(?!index\.php$) index.php [L]
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .

@@ -6,10 +6,7 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>Admin Login - RPMEIS</title>
   
-  <!-- Font & Icons -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  {{-- Font & Icons --}}
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   
   <style>
@@ -29,7 +26,7 @@
       --border-color: rgba(255, 255, 255, 0.6);
       --shadow-soft: 0 20px 40px rgba(0, 20, 30, 0.08), 0 8px 20px rgba(0, 0, 0, 0.02);
       
-      --font-base: 'Inter', sans-serif;
+      --font-base: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     /* --- Reset & Base --- */
@@ -268,18 +265,18 @@
 <body>
 
 <main class="login-wrapper">
-  <!-- Brand Header -->
+  {{-- Brand Header --}}
   <header class="brand">
     <img src="{{ asset('images/Visayas.png') }}" alt="RPMEIS Logo" class="brand-logo" />
     <h1>RPMEIS <span>·</span> <span class="brand-subtitle">Admin</span></h1>
   </header>
 
-  <!-- Admin Badge -->
+  {{-- Admin Badge --}}
   <div class="admin-badge">
     <i class="fas fa-shield-alt"></i> Restricted Access
   </div>
 
-  <!-- Login Form -->
+  {{-- Login Form --}}
   <form action="{{ route('admin.login.store') }}" method="post">
     @csrf
 
@@ -312,7 +309,7 @@
     </button>
   </form>
 
-  <!-- Footer -->
+  {{-- Footer --}}
   <footer class="footer-note">
     <i class="fas fa-lock"></i> RPMEIS © APMC 2026
   </footer>

@@ -18,6 +18,18 @@
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
     Header always set Permissions-Policy "camera=(self), microphone=(), geolocation=()"
 
+    # Caching directives for static sitemaps, robots, and xml
+    <FilesMatch "\.(xml|txt)$">
+        Header set Cache-Control "max-age=86400, public, must-revalidate"
+    </FilesMatch>
+
+    # Remove overly permissive CORS headers on static assets
+    <FilesMatch "\.(png|jpe?g|gif|ico|svg|webp)$">
+        Header unset Access-Control-Allow-Origin
+        Header always unset Access-Control-Allow-Origin
+        Header unset Access-Control-Allow-Methods
+        Header always unset Access-Control-Allow-Methods
+    </FilesMatch>
     Header unset Access-Control-Allow-Origin
     Header always unset Access-Control-Allow-Origin
     Header unset Access-Control-Allow-Methods

@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'RPMEIS Portal')</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
     @stack('styles')
     <style>
@@ -22,7 +19,7 @@
             
             --text-main: #1e2b36;
             --text-muted: #62778b;
-            --font-family: 'Inter', sans-serif;
+            --font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             
             --danger: #ef4444;
             --success: #10b981;
@@ -487,7 +484,7 @@
             </div>
         </div>
         <div class="nav-right">
-            <!-- Empty right section -->
+            {{-- Empty right section --}}
         </div>
     </header>
 
@@ -553,7 +550,7 @@
         }
     @endphp
 
-    <!-- Password / Settings Modal -->
+    {{-- Password / Settings Modal --}}
     <div id="layoutPasswordModal" class="modal-overlay" onclick="if(event.target===this)closeLayoutPasswordModal()">
         <div class="card" style="width:90%;max-width:420px;margin:auto;" onclick="event.stopPropagation()">
             <div class="card-header">

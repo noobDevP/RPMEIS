@@ -19,6 +19,14 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Auth\TwoFactorController;
 
+Route::get('/robots.txt', function () {
+    return response("User-agent: *\nAllow: /\nDisallow: /storage/\nDisallow: /api/\nSitemap: https://lawngreen-lyrebird-493319.hostingersite.com/sitemap.xml\n", 200, [
+        'Content-Type' => 'text/plain; charset=utf-8',
+        'X-Content-Type-Options' => 'nosniff',
+        'Strict-Transport-Security' => 'max-age=31536000; includeSubDomains',
+    ]);
+});
+
 // Database Connection Diagnostic Endpoint
 Route::get('/db-diagnostic', function () {
     $result = [

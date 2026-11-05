@@ -6,8 +6,11 @@
     RewriteRule ^(\.env|\.git|composer\.(json|lock)|package(-lock)?\.json|artisan|vite\.config\.js) - [F,L]
 
     # Block direct client requests containing /public prefix to prevent directory exposure and scanner fuzzing
-    RewriteCond %{THE_REQUEST} \s/+public[/\s?] [NC]
+    RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /+public [NC]
     RewriteRule ^ - [F,L]
+
+    # Explicitly rewrite robots.txt to public/robots.txt with headers
+    RewriteRule ^robots\.txt$ public/robots.txt [L]
 
     # Block bare directory requests from triggering Apache mod_dir redirect inflation
     RewriteRule ^(images|uploads|blank|tutorial|js|css|public)/?$ - [F,L]

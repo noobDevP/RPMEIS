@@ -4,15 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>500 - Server Error | RPMEIS</title>
-    <style>
-        body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-        .error-card { text-align: center; max-width: 480px; padding: 40px 30px; background: #1e293b; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid #334155; }
-        .error-code { font-size: 72px; font-weight: 800; color: #ef4444; margin: 0; line-height: 1; }
-        .error-title { font-size: 20px; font-weight: 600; margin: 15px 0 10px; color: #f1f5f9; }
-        .error-msg { font-size: 14px; color: #94a3b8; margin-bottom: 25px; line-height: 1.5; }
-        .btn-home { display: inline-block; background-color: #2563eb; color: #ffffff; text-decoration: none; padding: 10px 24px; border-radius: 6px; font-weight: 600; font-size: 14px; transition: background 0.2s; }
-        .btn-home:hover { background-color: #1d4ed8; }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/error.css') }}">
 </head>
 <body>
     <div class="error-card">

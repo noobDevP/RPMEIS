@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Http\Request;
 
 class AppServiceProvider extends ServiceProvider
@@ -36,6 +37,10 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('lookup', function (Request $request) {
             $limit = (int) env('AUTH_THROTTLE_LOOKUP_PER_MINUTE', 20);
             return Limit::perMinute($limit)->by($request->ip());
+        });
+
+        Blade::directive('nonce', function () {
+            return '<?php echo \'nonce="\' . (app()->bound(\'cspNonce\') ? app(\'cspNonce\') : \'\') . \'"\'; ?>';
         });
 
         Paginator::useBootstrapFive();

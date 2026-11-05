@@ -1,0 +1,40 @@
+.station-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 900px) {
+    .station-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.scanner-panel video,
+.scanner-panel canvas {
+    width: 100%;
+    max-width: 480px;
+    border-radius: 8px;
+    background: #000;
+}
+
+.scanner-panel {
+    text-align: center;
+}
+
+.patient-panel table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.patient-panel th,
+.patient-panel td {
+    border: 1px solid #ddd;
+    padding: 8px 10px;
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+.patient-panel th {
+    background: #eef2f7;
+}

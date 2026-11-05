@@ -45,13 +45,13 @@
 
         {{-- Action Buttons: Copy, Download, Print --}}
         <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px;">
-            <button type="button" class="btn btn-primary" onclick="copyRecoveryCodes()" style="flex: 1; min-width: 140px;">
+            <button type="button" class="btn btn-primary" id="copyCodesBtn" style="flex: 1; min-width: 140px;">
                 <i class="fas fa-copy"></i> <span id="copyCodesBtnText">Copy Codes</span>
             </button>
-            <button type="button" class="btn btn-outline" onclick="downloadRecoveryCodes()" style="flex: 1; min-width: 140px; border: 1px solid #cbd5e1; color: #1e293b; background: #fff;">
+            <button type="button" class="btn btn-outline" id="downloadCodesBtn" style="flex: 1; min-width: 140px; border: 1px solid #cbd5e1; color: #1e293b; background: #fff;">
                 <i class="fas fa-download"></i> Download .TXT
             </button>
-            <button type="button" class="btn btn-outline" onclick="window.print()" style="flex: 1; min-width: 140px; border: 1px solid #cbd5e1; color: #1e293b; background: #fff;">
+            <button type="button" class="btn btn-outline" id="printCodesBtn" style="flex: 1; min-width: 140px; border: 1px solid #cbd5e1; color: #1e293b; background: #fff;">
                 <i class="fas fa-print"></i> Print Codes
             </button>
         </div>
@@ -60,7 +60,7 @@
 
         {{-- Regenerate / Refresh Codes & Navigation --}}
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-            <form method="POST" action="{{ route('2fa.recovery-codes.regenerate') }}" onsubmit="return confirm('Generate 8 new recovery codes? This will immediately invalidate your current unused codes.');" style="margin: 0;">
+            <form method="POST" action="{{ route('2fa.recovery-codes.regenerate') }}" id="regenCodesForm" style="margin: 0;">
                 @csrf
                 <button type="submit" class="btn btn-danger" style="background: #dc2626; color: #fff;">
                     <i class="fas fa-sync-alt"></i> Generate New Codes (Refresh)
@@ -80,51 +80,6 @@
 </div>
 
 @push('scripts')
-<script>
-    function getRecoveryCodesList() {
-        return Array.from(document.querySelectorAll('.recovery-code-item'))
-            .map(el => el.textContent.trim())
-            .filter(Boolean);
-    }
-
-    function copyRecoveryCodes() {
-        const codes = getRecoveryCodesList();
-        if (!codes.length) return;
-        const text = "PME Portal 2FA Backup Recovery Codes:\n" + codes.join("\n");
-        navigator.clipboard.writeText(text).then(() => {
-            const label = document.getElementById('copyCodesBtnText');
-            if (label) {
-                label.textContent = 'Copied!';
-                setTimeout(() => { label.textContent = 'Copy Codes'; }, 2000);
-            }
-        });
-    }
-
-    function downloadRecoveryCodes() {
-        const codes = getRecoveryCodesList();
-        if (!codes.length) return;
-        const content = [
-            "==========================================",
-            "  PME PORTAL - 2FA BACKUP RECOVERY CODES  ",
-            "==========================================",
-            "Generated: " + new Date().toLocaleString(),
-            "Each code below can only be used once:",
-            "",
-            ...codes.map((c, idx) => `${idx + 1}. ${c}`),
-            "",
-            "Keep this file in a secure location."
-        ].join("\r\n");
-
-        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'pme-2fa-recovery-codes.txt';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }
-</script>
+<script src="{{ asset('js/2fa-recovery.js') }}" defer></script>
 @endpush
 @endsection

@@ -11,12 +11,8 @@
     RewriteRule ^(app|bootstrap|config|database|resources|routes|storage|tests|vendor)(/|$) - [F,L]
     RewriteRule ^(\.env|\.git|composer\.(json|lock)|package(-lock)?\.json|artisan|vite\.config\.js) - [F,L]
 
-    # Block direct directory traversal to avoid Apache mod_dir 301 redirects with body inflation (Big Redirect Detected)
-    RewriteCond %{REQUEST_URI} !^/?$
-    RewriteCond %{REQUEST_URI} !^/public/?$
-    RewriteCond %{DOCUMENT_ROOT}/public%{REQUEST_URI} -d [OR]
-    RewriteCond %{REQUEST_FILENAME} -d
-    RewriteRule ^ - [F,L]
+    # Block bare directory requests from triggering Apache mod_dir redirect inflation
+    RewriteRule ^(images|uploads|blank|tutorial)/?$ - [F,L]
 
     # Route all requests cleanly to the public/ directory
     RewriteCond %{REQUEST_URI} !^/public/

@@ -25,10 +25,8 @@
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
-    # Block direct directory traversal to avoid Apache mod_dir 301 redirects with body inflation (Big Redirect Detected)
-    RewriteCond %{REQUEST_URI} !^/?$
-    RewriteCond %{REQUEST_FILENAME} -d
-    RewriteRule ^ - [F,L]
+    # Block bare directory requests from triggering Apache mod_dir redirect inflation
+    RewriteRule ^(images|uploads|blank|tutorial)/?$ - [F,L]
 
     # Block access to hidden files and directories
     RewriteRule "(^|/)\." - [F]

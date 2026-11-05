@@ -266,8 +266,12 @@
 
 <main class="login-wrapper">
   {{-- Brand Header --}}
+  @php
+    $logoPath = public_path('images/Visayas.png');
+    $logoSrc = file_exists($logoPath) ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath)) : asset('images/Visayas.png');
+  @endphp
   <header class="brand">
-    <img src="{{ asset('images/Visayas.png') }}?v=2" alt="RPMEIS Logo" class="brand-logo" />
+    <img src="{{ $logoSrc }}" alt="RPMEIS Logo" class="brand-logo" />
     <h1>RPMEIS <span>·</span> <span class="brand-subtitle">Admin</span></h1>
   </header>
 

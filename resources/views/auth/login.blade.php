@@ -237,9 +237,13 @@
   <div class="login-card">
 
     {{-- brand: RPMEIS --}}
+    @php
+      $logoPath = public_path('images/Visayas.png');
+      $logoSrc = file_exists($logoPath) ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath)) : asset('images/Visayas.png');
+    @endphp
     <div class="brand">
       <div class="brand-icon">
-        <img src="{{ asset('images/Visayas.png') }}?v=2" alt="RPMEIS Logo" />
+        <img src="{{ $logoSrc }}" alt="RPMEIS Logo" />
       </div>
       <div class="brand-name">RPMEIS</div>
     </div>

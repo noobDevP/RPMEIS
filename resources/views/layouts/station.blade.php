@@ -21,6 +21,6 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script src="{{ asset('js/vendor/jsqr-1.4.0.min.js') }}"></script>
 @stack('station-scripts')
 @endpush

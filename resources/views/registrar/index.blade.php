@@ -137,8 +137,8 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.3.1/dist/jsQR.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ asset('js/vendor/jsqr-1.3.1.js') }}"></script>
+<script src="{{ asset('js/vendor/chart-4.6.1.js') }}"></script>
 <script>
     const video = document.getElementById('video');
     const result = document.getElementById('result');

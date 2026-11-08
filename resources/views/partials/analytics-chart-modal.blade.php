@@ -31,6 +31,6 @@
 </div>
 
 <!-- Load Chart.js and Datalabels plugin -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<script src="{{ asset('js/vendor/chart-4.6.1.js') }}"></script>
+<script src="{{ asset('js/vendor/chartjs-plugin-datalabels-2.2.0.js') }}"></script>
 <script src="{{ asset('js/analytics-chart-modal.js') }}" defer></script>

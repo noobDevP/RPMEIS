@@ -66,7 +66,7 @@ class SecurityHeadersMiddleware
             // Strict CSP Baseline (No unsafe-inline in script-src/style-src, No wildcards, Full fallback directives)
             $cspDirectives = [
                 "default-src 'self'",
-                "script-src 'self' 'nonce-{$nonce}' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://ajax.googleapis.com",
+                "script-src 'self' 'nonce-{$nonce}'",
                 "style-src 'self' 'nonce-{$nonce}' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net",
                 "style-src-attr 'unsafe-inline'",
                 "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:",

@@ -8,5 +8,5 @@
     <button type="button" class="btn btn-primary" id="closeQrModalBtn" style="margin-top:10px;">Close</button>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="{{ asset('js/vendor/qrcode-1.0.0.min.js') }}"></script>
 <script src="{{ asset('js/qr-modal.js') }}" defer></script>

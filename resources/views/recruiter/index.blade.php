@@ -27,7 +27,7 @@
 @endsection
 
 @push('styles')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" />
+<link rel="stylesheet" href="{{ asset('css/vendor/select2-4.0.13.min.css') }}" />
 <style>
     /* Modal styles from original */
     .modal-overlay {
@@ -450,9 +450,9 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="{{ asset('js/vendor/jquery-3.5.1.min.js') }}"></script>
+<script src="{{ asset('js/vendor/select2-4.0.13.min.js') }}"></script>
+<script src="{{ asset('js/vendor/qrcode-1.0.0.min.js') }}"></script>
 
 <script>
     let capturedImage = null;

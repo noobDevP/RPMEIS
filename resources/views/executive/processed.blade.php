@@ -682,7 +682,7 @@
 @endpush
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ asset('js/vendor/chart-4.6.1.js') }}"></script>
 <script>
 const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 const patients = @json($patientsPayload);

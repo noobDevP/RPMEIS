@@ -19,14 +19,32 @@ document.addEventListener('DOMContentLoaded', function () {
     if (submitBtn) {
         submitBtn.addEventListener('click', submitLayoutPassword);
     }
+
+    // Global delegation for modal triggers
+    document.addEventListener('click', function (e) {
+        const openTrigger = e.target.closest('[data-action="open-layout-password-modal"]');
+        if (openTrigger) {
+            e.preventDefault();
+            openLayoutPasswordModal();
+            return;
+        }
+        const closeTrigger = e.target.closest('[data-action="close-layout-password-modal"]');
+        if (closeTrigger) {
+            e.preventDefault();
+            closeLayoutPasswordModal();
+            return;
+        }
+    });
 });
 
-function openLayoutPasswordModal() { 
+function openLayoutPasswordModal(e) { 
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
     const modal = document.getElementById('layoutPasswordModal');
     if (modal) modal.classList.add('active'); 
 }
 
-function closeLayoutPasswordModal() { 
+function closeLayoutPasswordModal(e) { 
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
     const modal = document.getElementById('layoutPasswordModal');
     if (modal) modal.classList.remove('active'); 
 }

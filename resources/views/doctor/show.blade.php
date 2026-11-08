@@ -918,18 +918,18 @@ function renderDetails() {
                         ${patient.overall_stat === 'NOT DONE' && patient.chief_doctor_approval !== 'PASSED' && patient.chief_doctor_approval !== 'FAILED'
                             ? (patient.status?.text && patient.status.text !== 'ONGOING'
                                 ? `
-                                    <button type="button" class="btn btn-outline-soft" onclick="returnStatus('${patient.patient_no}')">
+                                    <button type="button" class="btn btn-outline-soft" data-action="return-status" data-patient-no="${patient.patient_no}" onclick="returnStatus('${patient.patient_no}')">
                                         <i class="fas fa-rotate-left"></i> Return Applicant
                                     </button>
                                 `
                                 : `
-                                    <button type="button" class="btn btn-success" style="background:#22c55e;color:#fff;" onclick="showActionModal('${patient.patient_no}', 'GO')">
+                                    <button type="button" class="btn btn-success" style="background:#22c55e;color:#fff;" data-action="show-action-modal" data-patient-no="${patient.patient_no}" data-status-value="GO" onclick="showActionModal('${patient.patient_no}', 'GO')">
                                         <i class="fas fa-check-circle"></i> GO
                                     </button>
-                                    <button type="button" class="btn btn-danger-solid" onclick="showActionModal('${patient.patient_no}', 'NO GO')">
+                                    <button type="button" class="btn btn-danger-solid" data-action="show-action-modal" data-patient-no="${patient.patient_no}" data-status-value="NO GO" onclick="showActionModal('${patient.patient_no}', 'NO GO')">
                                         <i class="fas fa-times-circle"></i> NO GO
                                     </button>
-                                    <button type="button" class="btn btn-warning" onclick="showActionModal('${patient.patient_no}', 'COMPLIANCE')">
+                                    <button type="button" class="btn btn-warning" data-action="show-action-modal" data-patient-no="${patient.patient_no}" data-status-value="COMPLIANCE" onclick="showActionModal('${patient.patient_no}', 'COMPLIANCE')">
                                         <i class="fas fa-clipboard-list"></i> COMPLIANCE
                                     </button>
                                 `)
@@ -1022,6 +1022,27 @@ function closeActionModal() {
     modal.style.display = 'none';
     document.getElementById('actionForm').reset();
 }
+
+// Delegated event listener for doctor action buttons
+document.addEventListener('click', function(e) {
+    const actionBtn = e.target.closest('[data-action="show-action-modal"]');
+    if (actionBtn) {
+        const pNo = actionBtn.getAttribute('data-patient-no');
+        const statusVal = actionBtn.getAttribute('data-status-value');
+        if (pNo && statusVal) {
+            showActionModal(pNo, statusVal);
+        }
+        return;
+    }
+    const returnBtn = e.target.closest('[data-action="return-status"]');
+    if (returnBtn) {
+        const pNo = returnBtn.getAttribute('data-patient-no');
+        if (pNo) {
+            returnStatus(pNo);
+        }
+        return;
+    }
+});
 
 // Submit action (update diagnosis, remarks, and approval status)
 function submitAction() {

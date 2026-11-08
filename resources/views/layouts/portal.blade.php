@@ -44,7 +44,7 @@
             <div style="padding: 1rem;">
                 <ul class="nav-links" style="padding: 0;">
                     <li>
-                        <a href="#" class="nav-item" onclick="openLayoutPasswordModal(); return false;">
+                        <a href="#" id="accountSettingsNavBtn" data-action="open-layout-password-modal" class="nav-item" onclick="openLayoutPasswordModal(); return false;">
                             <i class="fas fa-key"></i> Account Settings
                         </a>
                     </li>
@@ -100,7 +100,7 @@
         <div class="card" style="width:90%;max-width:420px;margin:auto;" onclick="event.stopPropagation()">
             <div class="card-header">
                 <span>Account Settings</span>
-                <span class="modal-close" onclick="closeLayoutPasswordModal()">&times;</span>
+                <span class="modal-close" data-action="close-layout-password-modal" onclick="closeLayoutPasswordModal()">&times;</span>
             </div>
             <div class="card-body" style="max-height: 70vh; overflow-y: auto;">
                 <form id="layoutPwForm" onsubmit="return false;">
@@ -158,7 +158,7 @@
                     @endif
 
                     <div id="layoutPwMsg" style="display:none; padding:10px; border-radius:12px; margin-bottom:16px; font-size:0.85rem; text-align:center;"></div>
-                    <button type="button" class="btn btn-primary" onclick="submitLayoutPassword()" style="width:100%; border-radius:40px; padding:0.8rem;">Update Settings</button>
+                    <button type="button" id="submitLayoutPasswordBtn" class="btn btn-primary" onclick="submitLayoutPassword()" style="width:100%; border-radius:40px; padding:0.8rem;">Update Settings</button>
 
                     <div style="margin-top: 20px; border-top: 1px solid rgba(180,195,210,0.35); padding-top: 16px;">
                         <h4 style="margin: 0 0 8px 0; font-size: 0.9rem; color: var(--text-main);">

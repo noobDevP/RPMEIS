@@ -141,13 +141,13 @@
     <i class="fas fa-user-doctor"></i> Chief Doctor Evaluation
 </a>
 <div class="nav-group-title" style="margin-top: 15px;">Management</div>
-<a href="#" class="nav-item" onclick="event.preventDefault(); openSigningDoctorsModal();">
+<a href="#" id="btnManageSigningDoctors" data-action="manage-signing-doctors" class="nav-item" onclick="event.preventDefault(); openSigningDoctorsModal();">
     <i class="fas fa-user-md"></i> Manage Signing Doctors
 </a>
-<a href="#" class="nav-item" onclick="event.preventDefault(); openApprovingAuthoritiesModal();">
+<a href="#" id="btnManageApprovingAuthorities" data-action="manage-approving-authorities" class="nav-item" onclick="event.preventDefault(); openApprovingAuthoritiesModal();">
     <i class="fas fa-id-badge"></i> Manage Approving Authorities
 </a>
-<a href="#" class="nav-item" onclick="event.preventDefault(); openChiefSurgeonsModal();">
+<a href="#" id="btnManageChiefSurgeons" data-action="manage-chief-surgeons" class="nav-item" onclick="event.preventDefault(); openChiefSurgeonsModal();">
     <i class="fas fa-user-tie"></i> Manage Chief Surgeons
 </a>
 @endsection
@@ -1210,12 +1210,12 @@ function renderDetails() {
                     <div style="margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap;">
                         ${(patient.overall_stat === 'NOT DONE' && patient.chief_doctor_approval !== 'PASSED' && patient.chief_doctor_approval !== 'FAILED') ? `
                             ${patient.can_approve ? `
-                                <button type="button" class="btn btn-success" onclick="openActionModal('${patient.patient_no}', 'approve')">
+                                <button type="button" class="btn btn-success" data-action="open-action-modal" data-patient-no="${patient.patient_no}" data-action-type="approve" onclick="openActionModal('${patient.patient_no}', 'approve')">
                                     <i class="fas fa-check"></i> Approve Applicant
                                 </button>
                             ` : ''}
                             ${patient.can_disqualify ? `
-                                <button type="button" class="btn btn-danger" onclick="openActionModal('${patient.patient_no}', 'disqualify')">
+                                <button type="button" class="btn btn-danger" data-action="open-action-modal" data-patient-no="${patient.patient_no}" data-action-type="disqualify" onclick="openActionModal('${patient.patient_no}', 'disqualify')">
                                     <i class="fas fa-times"></i> Disqualify Applicant
                                 </button>
                             ` : `
@@ -1224,7 +1224,7 @@ function renderDetails() {
                                 </div>
                             `}
                         ` : `
-                            <button type="button" class="btn btn-warning" onclick="returnApplicant('${patient.patient_no}')">
+                            <button type="button" class="btn btn-warning" data-action="return-applicant" data-patient-no="${patient.patient_no}" onclick="returnApplicant('${patient.patient_no}')">
                                 <i class="fas fa-undo"></i> Return Applicant
                             </button>
                         `}
@@ -1488,6 +1488,41 @@ function openChiefSurgeonsModal() {
 function closeChiefSurgeonsModal() {
     document.getElementById('chiefSurgeonsModal').style.display = 'none';
 }
+
+// Attach direct event listeners to manage navigation buttons
+document.getElementById('btnManageSigningDoctors')?.addEventListener('click', function (e) {
+    e.preventDefault();
+    openSigningDoctorsModal();
+});
+document.getElementById('btnManageApprovingAuthorities')?.addEventListener('click', function (e) {
+    e.preventDefault();
+    openApprovingAuthoritiesModal();
+});
+document.getElementById('btnManageChiefSurgeons')?.addEventListener('click', function (e) {
+    e.preventDefault();
+    openChiefSurgeonsModal();
+});
+
+// Event delegation for action modals & buttons
+document.addEventListener('click', function(e) {
+    const actionBtn = e.target.closest('[data-action="open-action-modal"]');
+    if (actionBtn) {
+        const pNo = actionBtn.getAttribute('data-patient-no');
+        const aType = actionBtn.getAttribute('data-action-type');
+        if (pNo && aType) {
+            openActionModal(pNo, aType);
+        }
+        return;
+    }
+    const returnBtn = e.target.closest('[data-action="return-applicant"]');
+    if (returnBtn) {
+        const pNo = returnBtn.getAttribute('data-patient-no');
+        if (pNo) {
+            returnApplicant(pNo);
+        }
+        return;
+    }
+});
 
 // Initialize filters
 document.getElementById('globalBatchFilter').addEventListener('change', function () {

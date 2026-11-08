@@ -4,7 +4,12 @@
 
 @section('sidebar-nav')
 <div class="nav-group-title">Administration</div>
-<a href="{{ route('admin.dashboard') }}" class="nav-item {{ request()->is('admin/dashboard') || request()->is('admin/dashboard/*') ? 'active' : '' }}">Users Masterlist</a>
+<a href="{{ route('admin.dashboard') }}" class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+    <i class="fas fa-users-cog"></i> Users Masterlist
+</a>
+<a href="{{ route('admin.logs') }}" class="nav-item {{ request()->routeIs('admin.logs') ? 'active' : '' }}">
+    <i class="fas fa-history"></i> System Logs
+</a>
 @endsection
 
 @section('header-title', 'Admin Dashboard')
@@ -304,8 +309,11 @@
 
 {{-- System Activity Logs --}}
 <div class="card" style="margin-top: 24px; margin-bottom: 24px;">
-    <div class="card-header">
+    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
         <span>System Activity Logs</span>
+        <a href="{{ route('admin.logs') }}" class="btn btn-outline btn-sm" style="border:1px solid #cbd5e1;color:#1e293b;background:#fff;text-decoration:none;">
+            <i class="fas fa-external-link-alt"></i> View Full Logs & Filters
+        </a>
     </div>
     <div class="card-body" style="padding:0;">
         <div class="table-responsive" style="max-height:400px;overflow-y:auto;overflow-x:auto;">

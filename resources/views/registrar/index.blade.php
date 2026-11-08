@@ -90,8 +90,7 @@
             <div>
                 <label style="font-weight:600;display:block;margin-bottom:4px;font-size:0.85rem;">Category</label>
                 <select id="analyticsCategorySelect" class="select-modern">
-                    <option value="">Select Category</option>
-                    <option value="All">All</option>
+                    <option value="All" selected>All Categories</option>
                     @foreach ($categoryMap as $key => $column)
                         <option value="{{ $key }}">{{ str_replace('_', '/', $key) }}</option>
                     @endforeach
@@ -100,8 +99,7 @@
             <div>
                 <label style="font-weight:600;display:block;margin-bottom:4px;font-size:0.85rem;">Batch</label>
                 <select id="analyticsBatchSelect" class="select-modern">
-                    <option value="">Select Batch</option>
-                    <option value="All">All</option>
+                    <option value="All" selected>All Batches</option>
                     @foreach ($batches as $batch)
                         <option value="{{ $batch }}">{{ $batch }}</option>
                     @endforeach
@@ -138,7 +136,6 @@
 
 @push('scripts')
 <script src="{{ asset('js/vendor/jsqr-1.3.1.js') }}"></script>
-<script src="{{ asset('js/vendor/chart-4.6.1.js') }}"></script>
 <script>
     const video = document.getElementById('video');
     const result = document.getElementById('result');
@@ -237,8 +234,10 @@
     startScanner();
 
     // Show Analytics modal
-    document.getElementById('showAnalyticsBtn').addEventListener('click', function() {
+    document.getElementById('showAnalyticsBtn')?.addEventListener('click', function(e) {
+        if (e && typeof e.preventDefault === 'function') e.preventDefault();
         document.getElementById('analyticsModal').style.display = 'block';
+        document.getElementById('filterAnalyticsBtn')?.click();
     });
 
     function closeAnalyticsModal() {

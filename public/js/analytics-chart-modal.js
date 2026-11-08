@@ -224,6 +224,32 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Global delegation for opening analytics
+    document.addEventListener('click', function(e) {
+        const trigger = e.target.closest('#showAnalyticsBtn, [data-action="show-analytics"]');
+        if (trigger) {
+            e.preventDefault();
+            const legacyModal = document.getElementById('analyticsModal');
+            if (legacyModal) {
+                legacyModal.style.display = 'block';
+                const catSelect = document.getElementById('analyticsCategorySelect');
+                const batchSelect = document.getElementById('analyticsBatchSelect');
+                if (catSelect && (!catSelect.value || catSelect.value === '')) {
+                    catSelect.value = 'All';
+                }
+                if (batchSelect && (!batchSelect.value || batchSelect.value === '')) {
+                    batchSelect.value = 'All';
+                }
+                const filterBtn = document.getElementById('filterAnalyticsBtn');
+                if (filterBtn) {
+                    filterBtn.click();
+                }
+            } else if (typeof openAnalyticsChart === 'function') {
+                openAnalyticsChart('All');
+            }
+        }
+    });
 });
 
 window.openAnalyticsChart = openAnalyticsChart;

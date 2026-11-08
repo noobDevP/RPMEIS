@@ -19,6 +19,6 @@ Route::middleware(['staff'])->group(function () {
     Route::put('/medical-form/assessment/{type}/{patient_no}', [MedicalFormAssessmentController::class, 'update'])->name('medical-form.assessment.update');
 });
 
-Route::middleware(['staff', 'role:DOCTOR,EXECUTIVE,RECRUITER,REGISTRAR'])->group(function () {
+Route::middleware(['staff', 'role:DOCTOR_ANY,DOCTOR,EXECUTIVE,RECRUITER,REGISTRAR,ADMIN'])->group(function () {
     Route::get('/medical-form/pdf/{medical_form_id}', [MedicalFormController::class, 'downloadPdf'])->name('medical-form.pdf');
 });

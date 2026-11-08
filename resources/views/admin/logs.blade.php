@@ -1,0 +1,75 @@
+@extends('layouts.portal')
+
+@section('title', 'System Logs')
+
+@section('sidebar-nav')
+<div class="nav-group-title">Administration</div>
+<a href="{{ route('admin.dashboard') }}" class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+    <i class="fas fa-users-cog"></i> Users Masterlist
+</a>
+<a href="{{ route('admin.logs') }}" class="nav-item {{ request()->routeIs('admin.logs') ? 'active' : '' }}">
+    <i class="fas fa-history"></i> System Logs
+</a>
+@endsection
+
+@section('header-title', 'System Logs')
+@section('header-subtitle', 'System activity and audit trail logs')
+
+@section('content')
+<div class="filter-tabs" style="display:flex; gap:10px; margin-bottom:20px;">
+    <a href="{{ route('admin.logs') }}" class="btn {{ empty($filter) ? 'btn-primary' : 'btn-secondary' }}">
+        All Logs
+    </a>
+    <a href="{{ route('admin.logs', ['filter' => 'logins']) }}" class="btn {{ $filter === 'logins' ? 'btn-primary' : 'btn-secondary' }}">
+        Log ins
+    </a>
+    <a href="{{ route('admin.logs', ['filter' => 'medical']) }}" class="btn {{ $filter === 'medical' ? 'btn-primary' : 'btn-secondary' }}">
+        Medical Actions
+    </a>
+    <a href="{{ route('admin.logs', ['filter' => 'downloads']) }}" class="btn {{ $filter === 'downloads' ? 'btn-primary' : 'btn-secondary' }}">
+        Downloads
+    </a>
+</div>
+
+{{-- System Activity Logs --}}
+<div class="card" style="margin-top: 0; margin-bottom: 24px;">
+    <div class="card-header">
+        <span>System Activity Logs</span>
+    </div>
+    <div class="card-body" style="padding:0;">
+        <div class="table-responsive" style="max-height:550px;overflow-y:auto;overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;min-width:800px;">
+                <thead style="background:#f3f4f6;position:sticky;top:0;z-index:1;">
+                    <tr>
+                        <th style="padding:12px 16px;text-align:center;font-weight:600;color:#374151;border-bottom:2px solid #e5e7eb;">Date & Time</th>
+                        <th style="padding:12px 16px;text-align:center;font-weight:600;color:#374151;border-bottom:2px solid #e5e7eb;">User</th>
+                        <th style="padding:12px 16px;text-align:center;font-weight:600;color:#374151;border-bottom:2px solid #e5e7eb;">Role</th>
+                        <th style="padding:12px 16px;text-align:center;font-weight:600;color:#374151;border-bottom:2px solid #e5e7eb;">Action</th>
+                        <th style="padding:12px 16px;text-align:center;font-weight:600;color:#374151;border-bottom:2px solid #e5e7eb;">Applicant No</th>
+                        <th style="padding:12px 16px;text-align:center;font-weight:600;color:#374151;border-bottom:2px solid #e5e7eb;">IP Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($activityLogs ?? [] as $log)
+                        <tr style="border-bottom:1px solid #e5e7eb;">
+                            <td style="padding:12px 16px;text-align:center;">{{ $log->created_at->format('Y-m-d h:i A') }}</td>
+                            <td style="padding:12px 16px;text-align:center;font-weight:500;">{{ $log->user_username ?? 'System' }}</td>
+                            <td style="padding:12px 16px;text-align:center;">{{ $log->role ?? '-' }}</td>
+                            <td style="padding:12px 16px;text-align:center;"><span class="badge" style="background:#e0f2fe;color:#0369a1;padding:4px 8px;border-radius:4px;font-size:0.85rem;font-weight:500;">{{ $log->action }}</span></td>
+                            <td style="padding:12px 16px;text-align:center;">{{ $log->patient_no ?? '-' }}</td>
+                            <td style="padding:12px 16px;text-align:center;font-family:monospace;color:#4b5563;">{{ $log->ip_address ?? '-' }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" style="padding:20px;text-align:center;color:#6b7280;">No activity logs found.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="mt-4">
+    {{ $activityLogs->links() }}
+</div>
+@endsection

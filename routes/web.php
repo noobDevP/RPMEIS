@@ -20,48 +20,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\TwoFactorController;
 
 Route::get('/robots.txt', function () {
-    return response("User-agent: *\nAllow: /\nDisallow: /storage/\nDisallow: /api/\nSitemap: https://lawngreen-lyrebird-493319.hostingersite.com/sitemap.xml\n", 200, [
+    return response(file_get_contents(public_path('robots.txt')), 200, [
         'Content-Type' => 'text/plain; charset=utf-8',
         'X-Content-Type-Options' => 'nosniff',
         'Strict-Transport-Security' => 'max-age=31536000; includeSubDomains',
     ]);
-});
-
-// Database Connection Diagnostic Endpoint
-Route::get('/db-diagnostic', function () {
-    $result = [
-        'database_configured' => config('database.connections.mysql.database'),
-        'username_configured' => config('database.connections.mysql.username'),
-        'host_configured' => config('database.connections.mysql.host'),
-        'connection_status' => 'unknown',
-        'error' => null,
-        'tables_found' => [],
-        'user_table_count' => null,
-        'admin_credential_count' => null,
-    ];
-
-    try {
-        \Illuminate\Support\Facades\DB::connection()->getPdo();
-        $result['connection_status'] = 'CONNECTED_SUCCESSFULLY';
-
-        $tables = \Illuminate\Support\Facades\DB::select('SHOW TABLES');
-        foreach ($tables as $t) {
-            $arr = (array) $t;
-            $result['tables_found'][] = array_values($arr)[0];
-        }
-
-        if (in_array('user_table', $result['tables_found'], true)) {
-            $result['user_table_count'] = \Illuminate\Support\Facades\DB::table('user_table')->count();
-        }
-        if (in_array('admin_credential', $result['tables_found'], true)) {
-            $result['admin_credential_count'] = \Illuminate\Support\Facades\DB::table('admin_credential')->count();
-        }
-    } catch (\Throwable $e) {
-        $result['connection_status'] = 'CONNECTION_FAILED';
-        $result['error'] = $e->getMessage();
-    }
-
-    return response()->json($result, $result['connection_status'] === 'CONNECTED_SUCCESSFULLY' ? 200 : 500);
 });
 
 // 2FA Routes

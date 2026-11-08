@@ -9,8 +9,8 @@
     RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /+public [NC]
     RewriteRule ^ - [F,L]
 
-    # Explicitly rewrite robots.txt to public/robots.txt with headers
-    RewriteRule ^robots\.txt$ public/robots.txt [L]
+    # Run robots.txt through Laravel so its response includes the application headers.
+    RewriteRule ^robots\.txt$ public/index.php [L]
 
     # Block bare directory requests from triggering Apache mod_dir redirect inflation
     RewriteRule ^(images|uploads|blank|tutorial|js|css|public)/?$ - [F,L]
@@ -27,6 +27,9 @@
 </IfModule>
 
 <IfModule mod_headers.c>
+    # Server-generated errors bypass Laravel's nonce-based policy.
+    Header always set Content-Security-Policy "default-src 'none'; script-src 'none'; style-src 'none'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'" "expr=%{REQUEST_STATUS} >= 400"
+
     # Security headers for root requests & static fallback (set on both tables for 200 OK and error responses)
     Header set X-Content-Type-Options "nosniff"
     Header always set X-Content-Type-Options "nosniff"
@@ -56,5 +59,8 @@
         Header always set Access-Control-Allow-Methods "GET, OPTIONS"
     </FilesMatch>
 </IfModule>
+
+# A plain error document needs no inline scripts or styles.
+ErrorDocument 403 "Forbidden"
 
 Options -Indexes

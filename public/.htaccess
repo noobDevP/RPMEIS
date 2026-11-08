@@ -10,6 +10,9 @@
     RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1|\[::1\])(:[0-9]+)?$ [NC]
     RewriteRule ^(?!index\.php$) index.php [L]
 
+    # Route this existing file through Laravel instead of serving it without middleware.
+    RewriteRule ^robots\.txt$ index.php [L]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
@@ -41,6 +44,9 @@
 </IfModule>
 
 <IfModule mod_headers.c>
+    # Server-generated errors bypass Laravel's nonce-based policy.
+    Header always set Content-Security-Policy "default-src 'none'; script-src 'none'; style-src 'none'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'" "expr=%{REQUEST_STATUS} >= 400"
+
     # Security headers applied to all responses (including static files like images and robots.txt)
     Header set X-Content-Type-Options "nosniff"
     Header always set X-Content-Type-Options "nosniff"
@@ -70,3 +76,5 @@
         Header always set Access-Control-Allow-Methods "GET, OPTIONS"
     </FilesMatch>
 </IfModule>
+
+ErrorDocument 403 "Forbidden"

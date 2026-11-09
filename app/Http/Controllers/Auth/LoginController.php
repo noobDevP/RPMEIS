@@ -70,12 +70,15 @@ class LoginController extends Controller
 
         
         if ($user->two_factor_enabled) {
+            $request->session()->forget(['staff', 'admin']);
+            $request->session()->regenerate();
             session([
                 '2fa.pending' => [
                     'type' => 'staff',
                     'id' => $user->user_id
                 ]
             ]);
+            $request->session()->save();
             return redirect()->route('2fa.challenge');
         }
 
@@ -97,9 +100,11 @@ class LoginController extends Controller
         \App\Services\ActivityLogger::log('Logged In', null, $user->user_username, $user->role()?->value);
 
         if (!$user->two_factor_enabled) {
+            $request->session()->save();
             return redirect()->route('2fa.settings')->with('warning', 'You must set up Two-Factor Authentication to access your account.');
         }
 
+        $request->session()->save();
         return redirect($this->staffAuth->redirectPathFor($user));
     }
 

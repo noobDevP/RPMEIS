@@ -87,8 +87,10 @@ class SecurityHeadersMiddleware
             $response->headers->remove('Server');
 
             if ($response->headers instanceof \Symfony\Component\HttpFoundation\ResponseHeaderBag) {
+                $isSecure = $request->isSecure() || $request->header('X-Forwarded-Proto') === 'https' || (config('app.env') === 'production');
                 foreach ($response->headers->getCookies() as $cookie) {
-                    if (!$cookie->isHttpOnly()) {
+                    $shouldBeSecure = $cookie->isSecure() || $isSecure;
+                    if (!$cookie->isHttpOnly() || ($isSecure && !$cookie->isSecure())) {
                         $response->headers->setCookie(
                             new \Symfony\Component\HttpFoundation\Cookie(
                                 $cookie->getName(),
@@ -96,7 +98,7 @@ class SecurityHeadersMiddleware
                                 $cookie->getExpiresTime(),
                                 $cookie->getPath(),
                                 $cookie->getDomain(),
-                                $cookie->isSecure(),
+                                $shouldBeSecure,
                                 true,
                                 $cookie->isRaw(),
                                 $cookie->getSameSite()

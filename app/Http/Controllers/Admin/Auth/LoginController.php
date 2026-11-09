@@ -44,12 +44,15 @@ class LoginController extends Controller
 
         
         if ($admin->two_factor_enabled) {
+            $request->session()->forget(['staff', 'admin']);
+            $request->session()->regenerate();
             session([
                 '2fa.pending' => [
                     'type' => 'admin',
                     'id' => $admin->admin_id
                 ]
             ]);
+            $request->session()->save();
             return redirect()->route('2fa.challenge');
         }
 
@@ -61,6 +64,7 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
         $admin->update(['session_id' => session()->getId()]);
+        $request->session()->save();
 
         return redirect('/admin/dashboard');
     }

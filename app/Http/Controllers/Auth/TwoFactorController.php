@@ -22,7 +22,7 @@ class TwoFactorController extends Controller
     public function challenge()
     {
         if (!session()->has('2fa.pending')) {
-            return redirect()->route('login');
+            return redirect()->route('login')->withErrors(['login' => 'Your session expired or 2FA was interrupted. Please sign in again.']);
         }
 
         return view('auth.2fa_challenge');
@@ -36,7 +36,7 @@ class TwoFactorController extends Controller
 
         $pending = session('2fa.pending');
         if (!$pending) {
-            return redirect()->route('login');
+            return redirect()->route('login')->withErrors(['login' => 'Your session expired. Please sign in again.']);
         }
 
         $google2fa = new Google2FA();
@@ -73,7 +73,7 @@ class TwoFactorController extends Controller
     public function recoveryChallenge()
     {
         if (!session()->has('2fa.pending')) {
-            return redirect()->route('login');
+            return redirect()->route('login')->withErrors(['login' => 'Your session expired or 2FA was interrupted. Please sign in again.']);
         }
 
         return view('auth.2fa_recovery_challenge');
@@ -90,7 +90,7 @@ class TwoFactorController extends Controller
 
         $pending = session('2fa.pending');
         if (!$pending) {
-            return redirect()->route('login');
+            return redirect()->route('login')->withErrors(['login' => 'Your session expired. Please sign in again.']);
         }
 
         $user = $this->resolvePendingUser($pending);
@@ -358,6 +358,7 @@ class TwoFactorController extends Controller
             ]);
 
             ActivityLogger::log('Logged In (2FA Verified)');
+            $request->session()->save();
 
             return redirect($this->auth->redirectPathFor($user));
         }
@@ -373,10 +374,12 @@ class TwoFactorController extends Controller
                 'admin_logged_in' => true,
                 'admin_username' => $user->admin_username,
             ]);
+            $request->session()->save();
 
             return redirect()->route('admin.dashboard');
         }
 
+        $request->session()->save();
         return redirect()->route('login');
     }
 

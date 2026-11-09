@@ -7,6 +7,7 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Http\Request;
 
 class AppServiceProvider extends ServiceProvider
@@ -24,6 +25,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (config('app.env') === 'production' || str_starts_with((string) config('app.url'), 'https://')) {
+            URL::forceScheme('https');
+        }
+
         // Login throttle: Configurable via AUTH_THROTTLE_LOGIN_PER_MINUTE (default 10).
         // Can be increased during penetration testing / VAPT assessments in .env
         // (e.g. AUTH_THROTTLE_LOGIN_PER_MINUTE=120) to prevent 429 scanner lockouts.

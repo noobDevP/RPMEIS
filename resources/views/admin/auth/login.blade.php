@@ -33,9 +33,15 @@
   <form action="{{ route('admin.login.store') }}" method="post">
     @csrf
 
-    @error('login')
-        <div class="error-message">{{ $message }}</div>
-    @enderror
+    @if ($errors->any())
+        <div class="error-message">{{ $errors->first() }}</div>
+    @endif
+    @if (session('warning'))
+        <div class="error-message" style="background: #fffbeb; color: #b45309; border-color: #fde68a;">{{ session('warning') }}</div>
+    @endif
+    @if (session('status'))
+        <div class="error-message" style="background: #eff6ff; color: #1e40af; border-color: #bfdbfe;">{{ session('status') }}</div>
+    @endif
 
     <div class="form-group">
       <label for="adminUsername">

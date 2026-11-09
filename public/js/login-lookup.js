@@ -1,43 +1,24 @@
 document.addEventListener('DOMContentLoaded', function() {
-    var passwordInput = document.getElementById('password');
     var usernameInput = document.getElementById('username');
-    var userUsernameInput = document.getElementById('user_username');
+    var form = document.querySelector('form');
 
-    if (!passwordInput || !usernameInput) {
-        return;
+    if (usernameInput) {
+        usernameInput.addEventListener('input', function() {
+            this.value = this.value.toUpperCase();
+        });
     }
 
-    usernameInput.addEventListener('input', function() {
-        this.value = this.value.toUpperCase();
-    });
-
-    passwordInput.addEventListener('input', function() {
-        var username = usernameInput.value;
-        var password = this.value;
-
-        if (!username || !password) {
-            return;
-        }
-
-        var metaCsrf = document.querySelector('meta[name="csrf-token"]');
-        var csrfToken = metaCsrf ? metaCsrf.getAttribute('content') : '';
-
-        fetch('/auth/lookup-display-name', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRF-TOKEN': csrfToken,
-            },
-            body: 'username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password),
-        })
-        .then(function(response) { return response.text(); })
-        .then(function(data) {
-            if (userUsernameInput) {
-                userUsernameInput.value = data;
+    if (form) {
+        form.addEventListener('submit', function() {
+            var btn = form.querySelector('button[type="submit"]');
+            if (btn && !btn.disabled) {
+                // Prevent duplicate form submissions while request is in-flight
+                setTimeout(function() {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.7';
+                    btn.style.cursor = 'not-allowed';
+                }, 10);
             }
-        })
-        .catch(function(error) {
-            console.error('Error:', error);
         });
-    });
+    }
 });

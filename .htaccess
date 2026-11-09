@@ -18,7 +18,7 @@
 
     # Discard query strings on static assets to prevent scanners from fuzzing static file versions
     RewriteCond %{QUERY_STRING} .
-    RewriteCond %{REQUEST_URI} \.(js|css|png|jpe?g|gif|ico|svg|webp|txt|xml)$ [NC]
+    RewriteCond %{REQUEST_URI} \.(js|css|png|jpe?g|gif|ico|svg|webp|txt|xml|woff2?|ttf|eot)$ [NC]
     RewriteRule ^(.*)$ $1? [L]
 
     # Route all requests cleanly to the public/ directory

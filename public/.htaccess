@@ -27,11 +27,11 @@
     RewriteRule ^ %1 [L,R=301]
 
     # Block bare directory requests from triggering Apache mod_dir redirect inflation
-    RewriteRule ^(images|uploads|blank|tutorial|js|css|public)/?$ - [F,L]
+    RewriteRule ^(images|uploads|blank|tutorial|js|css|public|vendor)/?$ - [F,L]
 
     # Discard query strings on static assets to prevent scanners from fuzzing static file versions
     RewriteCond %{QUERY_STRING} .
-    RewriteCond %{REQUEST_URI} \.(js|css|png|jpe?g|gif|ico|svg|webp|txt|xml)$ [NC]
+    RewriteCond %{REQUEST_URI} \.(js|css|png|jpe?g|gif|ico|svg|webp|txt|xml|woff2?|ttf|eot)$ [NC]
     RewriteRule ^(.*)$ $1? [L]
 
     # Block access to hidden files and directories

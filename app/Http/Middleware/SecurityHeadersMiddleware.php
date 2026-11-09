@@ -58,7 +58,7 @@ class SecurityHeadersMiddleware
             $response->header('Referrer-Policy', 'strict-origin-when-cross-origin');
             $response->header('Permissions-Policy', 'camera=(self), microphone=(), geolocation=()');
 
-            if (!$request->is('images/*', 'css/*', 'js/*', '*.png', '*.jpg', '*.ico')) {
+            if (!$request->is('images/*', 'css/*', 'js/*', 'vendor/*', '*.png', '*.jpg', '*.ico', '*.woff', '*.woff2', '*.ttf')) {
                 $response->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
                 $response->header('Pragma', 'no-cache');
             }
@@ -68,9 +68,9 @@ class SecurityHeadersMiddleware
                 "default-src 'self'",
                 "script-src 'self' 'nonce-{$nonce}'",
                 "script-src-attr 'unsafe-inline'",
-                "style-src 'self' 'nonce-{$nonce}' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net",
+                "style-src 'self' 'nonce-{$nonce}'",
                 "style-src-attr 'unsafe-inline'",
-                "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:",
+                "font-src 'self' data:",
                 "img-src 'self' data: blob:",
                 "connect-src 'self' https://psgc.gitlab.io",
                 "frame-ancestors 'none'",

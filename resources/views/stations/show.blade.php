@@ -488,7 +488,7 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('js/vendor/jsqr-1.3.1.js') }}"></script>
+<script src="{{ asset('js/vendor/jsqr-1.4.0.min.js') }}"></script>
 <script>
 const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 const updateEndpoint = '{{ $cleanUpdateUrl }}';

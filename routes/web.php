@@ -15,12 +15,19 @@ use App\Http\Controllers\RegistrarController;
 use App\Http\Controllers\SigningDoctorController;
 use App\Http\Controllers\ApprovingAuthorityController;
 use App\Http\Controllers\StationPageController;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Auth\TwoFactorController;
 
 Route::get('/robots.txt', function () {
-    return response(file_get_contents(public_path('robots.txt')), 200, [
+    $content = "User-agent: *\n";
+    $content .= "Allow: /\n";
+    $content .= "Disallow: /storage/\n";
+    $content .= "Disallow: /api/\n";
+    $content .= "Sitemap: " . config('app.url') . "/sitemap.xml";
+
+    return Response::make($content, 200, [
         'Content-Type' => 'text/plain; charset=utf-8',
         'X-Content-Type-Options' => 'nosniff',
         'Strict-Transport-Security' => 'max-age=31536000; includeSubDomains',

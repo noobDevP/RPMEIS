@@ -22,7 +22,16 @@ class AdminLoginRequest extends FormRequest
                 'max:50',
                 'regex:/^[a-zA-Z0-9_\-\.\@\s]+$/',
             ],
-            'password' => ['required', 'string', 'max:255'],
+            'password' => [
+                'required',
+                'string',
+                'max:255',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (is_string($value) && $this->hasPathShapedPassword($value)) {
+                        $fail('Invalid characters detected.');
+                    }
+                },
+            ],
         ];
     }
 
@@ -36,7 +45,7 @@ class AdminLoginRequest extends FormRequest
     {
         $rawUsername = (string) $this->input('username', '');
 
-        if ($this->hasTraversalSequence($rawUsername)) {
+        if ($this->hasTraversalSequence($rawUsername) || $this->hasPathShapedPassword((string) $this->input('password', ''))) {
             throw new HttpResponseException(response()->json([
                 'error' => 'Bad Request',
                 'message' => 'Invalid characters detected in admin login parameters.',
@@ -52,6 +61,17 @@ class AdminLoginRequest extends FormRequest
             || str_contains($value, '/')
             || str_contains($value, '\\')
             || str_contains($value, '%')
+            || str_contains($value, "\0");
+    }
+
+    /**
+     * Passwords are only ever hashed/compared, never used in file paths, so legitimate
+     * passwords may contain "/" or "%". Only reject values that are path-shaped:
+     * a leading path separator, "../" or "..\\" sequences, or NUL bytes.
+     */
+    private function hasPathShapedPassword(string $value): bool
+    {
+        return preg_match('#^[/\\\\]|\.\.[/\\\\]#', $value) === 1
             || str_contains($value, "\0");
     }
 

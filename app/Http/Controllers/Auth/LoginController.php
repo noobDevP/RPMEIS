@@ -115,6 +115,11 @@ class LoginController extends Controller
             return response('Invalid username', 400, ['Content-Type' => 'text/plain']);
         }
 
+        $rawPassword = (string) $request->input('password', '');
+        if (preg_match('#^[/\\\\]|\.\.[/\\\\]#', $rawPassword) === 1 || str_contains($rawPassword, "\0")) {
+            return response('Invalid request', 400, ['Content-Type' => 'text/plain']);
+        }
+
         $request->validate([
             'username' => ['required', 'string', 'max:50', 'regex:/^[a-zA-Z0-9_\-\.\@\s]+$/'],
             'password' => ['required', 'string', 'max:255'],

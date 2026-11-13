@@ -3,40 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Models\DoctorLog;
-use App\Models\Patient;
 use App\Models\SigningDoctor;
+use App\Services\PatientTablePayloadService;
 use App\Support\StationRegistry;
 use Illuminate\View\View;
 
 class DoctorPortalController extends Controller
 {
-        public function chiefScanner(): View
+    public function __construct(
+        private PatientTablePayloadService $patientTables,
+    ) {}
+
+    public function chiefScanner(): View
     {
         return view('doctor.chief_scanner');
     }
 
     public function index(): View
     {
-        $patients = Patient::query()
-            ->with(['applications.examinations.assessments'])
-            ->whereHas('applications', fn($q) => $q->whereRaw("LOWER(status) = 'active'"))
-            ->where('is_activated', 1)
-            ->whereHas('applications.examinations', fn($q) => $q->where('overall_stat', '!=', 'COMPLETED'))
-            ->orderByDesc('patient_id')
-            ->get();
-
-        $stations = config('stations.stations', []);
-        $signingDoctors = SigningDoctor::orderBy('name')->get();
-        $approvingAuthorities = \App\Models\ApprovingAuthority::getAllWithChiefDoctor();
-        $chiefSurgeons = \App\Models\ChiefSurgeon::orderBy('name')->get();
-
-        return view('doctor.index', [
-            'patients' => $patients,
-            'stations' => $stations,
-            'signingDoctors' => $signingDoctors,
-            'approvingAuthorities' => $approvingAuthorities,
-            'chiefSurgeons' => $chiefSurgeons,
-        ]);
+        return $this->renderChiefQueue('not_completed');
     }
 
     public function scanner(string $station): View
@@ -53,21 +38,23 @@ class DoctorPortalController extends Controller
     {
         $config = StationRegistry::get($station);
 
-        $patients = Patient::query()
-            ->with(['applications.examinations.assessments'])
-            ->whereHas('applications', fn($q) => $q->whereRaw("LOWER(status) = 'active'"))
-            ->where('is_activated', 1)
-            ->whereHas('applications.examinations', fn($q) => $q->where('overall_stat', '!=', 'COMPLETED'))
-            ->orderByDesc('patient_id')
-            ->get();
+        $directory = $this->patientTables->fetchDirectoryData([
+            'mode' => 'doctor_station',
+            'station' => $station,
+            'activatedOnly' => true,
+            'inactiveApplications' => false,
+            'examConstraint' => 'not_completed',
+        ]);
 
         $signingDoctors = SigningDoctor::orderBy('name')->get();
-        $approvingAuthorities = \App\Models\ApprovingAuthority::getAllWithChiefDoctor();
 
         return view('doctor.show', [
             'station' => $station,
             'stationConfig' => $config,
-            'patients' => $patients,
+            'patients' => collect(),
+            'patientsPayload' => $directory['patientsPayload'],
+            'batchOptions' => $directory['batchOptions'],
+            'assessmentType' => $directory['assessmentType'],
             'signingDoctors' => $signingDoctors,
         ]);
     }
@@ -89,63 +76,47 @@ class DoctorPortalController extends Controller
 
     public function cleared(): View
     {
-        $patients = Patient::query()
-            ->whereHas('applications', fn($q) => $q->whereRaw("LOWER(status) = 'active'"))
-            ->where('is_activated', 1)
-            ->whereHas('applications.examinations', fn($q) => $q->where('overall_stat', 'DONE'))
-            ->whereHas('applications.examinations', fn($q) => $q->where('overall_stat', '!=', 'COMPLETED'))
-            ->orderByDesc('patient_id')
-            ->get();
-
-        $stations = config('stations.stations', []);
-        $signingDoctors = \App\Models\SigningDoctor::orderBy('name')->get();
-        $approvingAuthorities = \App\Models\ApprovingAuthority::getAllWithChiefDoctor();
-        $chiefSurgeons = \App\Models\ChiefSurgeon::orderBy('name')->get();
-
-        return view('doctor.index', [
-            'patients' => $patients,
-            'stations' => $stations,
-            'signingDoctors' => $signingDoctors,
-            'approvingAuthorities' => $approvingAuthorities,
-            'chiefSurgeons' => $chiefSurgeons,
-        ]);
+        return $this->renderChiefQueue('done_not_completed');
     }
 
     public function disqualified(): View
     {
-        $patients = Patient::query()
-            ->whereHas('applications', fn($q) => $q->whereRaw("LOWER(status) = 'active'"))
-            ->where('is_activated', 1)
-            ->whereHas('applications.examinations', fn($q) => $q->where('overall_stat', '!=', 'COMPLETED'))
-            ->whereHas('applications.examinations', fn($q) => $q->where('chief_doctor_approval', 'FAILED'))
-            ->orderByDesc('patient_id')
+        return $this->renderChiefQueue('failed_not_completed');
+    }
+
+    public function completedForms(): View
+    {
+        $patients = $this->patientTables
+            ->patientDirectoryQuery(activatedOnly: true, inactiveApplications: false)
+            ->whereHas('applications.examinations', fn ($q) => $q->where('overall_stat', 'COMPLETED'))
             ->get();
 
+        return view('doctor.completed-forms', compact('patients'));
+    }
+
+    private function renderChiefQueue(string $examConstraint): View
+    {
+        $directory = $this->patientTables->fetchDirectoryData([
+            'mode' => 'doctor_chief',
+            'activatedOnly' => true,
+            'inactiveApplications' => false,
+            'examConstraint' => $examConstraint,
+        ]);
+
         $stations = config('stations.stations', []);
-        $signingDoctors = \App\Models\SigningDoctor::orderBy('name')->get();
+        $signingDoctors = SigningDoctor::orderBy('name')->get();
         $approvingAuthorities = \App\Models\ApprovingAuthority::getAllWithChiefDoctor();
         $chiefSurgeons = \App\Models\ChiefSurgeon::orderBy('name')->get();
 
         return view('doctor.index', [
-            'patients' => $patients,
+            'patients' => collect(),
+            'patientsPayload' => $directory['patientsPayload'],
+            'batchOptions' => $directory['batchOptions'],
             'stations' => $stations,
             'signingDoctors' => $signingDoctors,
             'approvingAuthorities' => $approvingAuthorities,
             'chiefSurgeons' => $chiefSurgeons,
         ]);
-    }
-
-    public function completedForms(): View
-    {
-        $patients = Patient::query()
-            ->with(['applications.examinations.assessments'])
-            ->whereHas('applications', fn ($q) => $q->whereRaw("LOWER(status) = 'active'"))
-            ->where('is_activated', 1)
-            ->whereHas('applications.examinations', fn ($q) => $q->where('overall_stat', 'COMPLETED'))
-            ->orderByDesc('patient_id')
-            ->get();
-
-        return view('doctor.completed-forms', compact('patients'));
     }
 }
 

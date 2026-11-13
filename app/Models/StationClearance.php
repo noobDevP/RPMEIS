@@ -29,8 +29,17 @@ class StationClearance extends Model
     }
 
     // --- Legacy Accessors to prevent immediate breakage ---
-    public function getStationKeyAttribute()
+    public function getStationKeyAttribute(): ?string
     {
-        return $this->station->station_key;
+        return $this->station?->station_key;
+    }
+
+    public function getAttachmentAttribute(): ?string
+    {
+        if ($this->relationLoaded('attachments')) {
+            return $this->attachments->last()?->file_path;
+        }
+
+        return $this->attachments()->latest('attachment_id')->value('file_path');
     }
 }

@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Patient;
 use App\Models\SigningDoctor;
 use App\Services\AnalyticsService;
+use App\Services\PatientTablePayloadService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -12,6 +12,7 @@ class ExecutiveController extends Controller
 {
     public function __construct(
         private AnalyticsService $analytics,
+        private PatientTablePayloadService $patientTables,
     ) {}
 
     
@@ -39,35 +40,28 @@ class ExecutiveController extends Controller
         $filter = strtolower(trim($request->query('filter', '')));
         $archive = $request->query('archive') === '1';
 
-        $patients = Patient::query()
-            ->with(['applications.examinations.assessments'])
-            ->whereHas('applications', fn($q) => $q->whereRaw($archive ? "LOWER(status) = 'inactive'" : "LOWER(status) = 'active'"))
-            ->where('is_activated', 1)
-            ->when($filter === 'ongoing', fn ($q) => $q->whereHas('applications.examinations', fn($q) => $q->where('overall_stat', 'NOT DONE')))
-            ->when($filter === 'cleared', fn ($q) => $q->whereHas('applications.examinations', fn($q) => $q->where('overall_stat', 'DONE'))->whereHas('applications.examinations', fn($q) => $q->where('chief_doctor_approval', 'PASSED')))
-            ->when($filter === 'done', fn ($q) => $q->whereHas('applications.examinations', fn($q) => $q->where('overall_stat', 'COMPLETED')))
-            ->when($filter === 'disqualified', fn ($q) => $q->whereHas('applications.examinations', fn($q) => $q->where('chief_doctor_approval', 'FAILED')))
-            ->when($filter === '', function ($q) use ($archive) {
-                if (!$archive) {
-                    $q->whereHas('applications.examinations', fn($q) => $q->where('overall_stat', '!=', 'COMPLETED'));
-                }
-            })
-            ->orderByDesc('patient_id')
-            ->get();
-
+        $directory = $this->patientTables->fetchDirectoryData([
+            'mode' => 'executive',
+            'activatedOnly' => true,
+            'inactiveApplications' => $archive,
+            'filter' => $filter,
+            'archive' => $archive,
+            'excludeCompletedWhenEmpty' => true,
+        ]);
         $batches = $this->analytics->distinctBatches();
         $signingDoctors = SigningDoctor::orderBy('name')->get();
-        $approvingAuthorities = \App\Models\ApprovingAuthority::getAllWithChiefDoctor();
         $categoryMap = config('stations.analytics_categories', []);
 
         return view('executive.processed', [
-            'patients' => $patients,
+            'patients' => collect(),
+            'patientsPayload' => $directory['patientsPayload'],
+            'batchOptions' => $directory['batchOptions'],
             'filter' => $filter,
             'archive' => $archive,
             'batches' => $batches,
             'categoryMap' => $categoryMap,
             'signingDoctors' => $signingDoctors,
-                    ]);
+        ]);
     }
 
     /**

@@ -34,8 +34,98 @@ document.addEventListener('DOMContentLoaded', function () {
             closeLayoutPasswordModal();
             return;
         }
+        const filterToggle = e.target.closest('[data-filter-toggle]');
+        if (filterToggle) {
+            e.preventDefault();
+            togglePatientFilters(filterToggle);
+            return;
+        }
     });
+
+    initCollapsibleFilters();
 });
+
+function resolveFilterTarget(btn) {
+    const targetId = btn.getAttribute('data-filter-target');
+    return targetId ? document.getElementById(targetId) : null;
+}
+
+function countActiveFilters(panel) {
+    if (!panel) return 0;
+    let count = 0;
+
+    panel.querySelectorAll('select').forEach(select => {
+        const val = (select.value || '').trim();
+        if (val !== '' && val !== 'All' && val !== 'ALL' && val !== '0') {
+            count++;
+        }
+    });
+
+    panel.querySelectorAll('input[type="text"], input[type="search"]').forEach(input => {
+        if ((input.value || '').trim() !== '') {
+            count++;
+        }
+    });
+
+    return count;
+}
+
+function syncFilterBadge(btn, panel) {
+    const badge = btn.querySelector('[data-filter-count]');
+    const activeCount = countActiveFilters(panel);
+    btn.classList.toggle('has-active-filters', activeCount > 0);
+    if (badge) {
+        badge.textContent = String(activeCount);
+    }
+}
+
+function setFilterPanelOpen(btn, panel, open, persist = true) {
+    panel.classList.toggle('is-collapsed', !open);
+    btn.classList.toggle('is-open', open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+
+    const textEl = btn.querySelector('[data-filter-toggle-label]');
+    if (textEl) {
+        textEl.textContent = open ? 'Hide Filters' : 'Filters';
+    }
+
+    if (persist) {
+        const storageKey = btn.getAttribute('data-filter-storage');
+        if (storageKey) {
+            try {
+                window.localStorage.setItem('philarmy_filters_open:' + storageKey, open ? '1' : '0');
+            } catch (_) {}
+        }
+    }
+}
+
+function togglePatientFilters(btn) {
+    const panel = resolveFilterTarget(btn);
+    if (!panel) return;
+    const isCurrentlyOpen = !panel.classList.contains('is-collapsed');
+    setFilterPanelOpen(btn, panel, !isCurrentlyOpen, true);
+}
+
+function initCollapsibleFilters() {
+    document.querySelectorAll('[data-filter-toggle]').forEach(btn => {
+        const panel = resolveFilterTarget(btn);
+        if (!panel) return;
+
+        let initialOpen = false;
+        const storageKey = btn.getAttribute('data-filter-storage');
+        if (storageKey) {
+            try {
+                initialOpen = window.localStorage.getItem('philarmy_filters_open:' + storageKey) === '1';
+            } catch (_) {}
+        }
+
+        setFilterPanelOpen(btn, panel, initialOpen, false);
+        syncFilterBadge(btn, panel);
+
+        panel.addEventListener('change', () => syncFilterBadge(btn, panel));
+        panel.addEventListener('input', () => syncFilterBadge(btn, panel));
+    });
+}
 
 function openLayoutPasswordModal(e) { 
     if (e && typeof e.preventDefault === 'function') e.preventDefault();

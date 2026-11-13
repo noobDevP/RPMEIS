@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Patient;
 use App\Models\RegistrarLog;
 use App\Models\SigningDoctor;
+use App\Services\PatientTablePayloadService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class RegistrarController extends Controller
 {
-            
+    public function __construct(
+        private PatientTablePayloadService $patientTables,
+    ) {}
 
     public function activate(): View
     {
@@ -48,29 +51,27 @@ class RegistrarController extends Controller
 
             $filter = strtolower(trim($request->query('filter', '')));
 
-            $patients = Patient::query()
-                ->with(['applications.examinations.assessments'])
-                ->where('is_activated', 1)
-                ->when($filter === 'archived', 
-                    fn ($q) => $q->whereHas('applications', fn($q) => $q->whereRaw("LOWER(status) = 'inactive'")),
-                    fn ($q) => $q->whereHas('applications', fn($q) => $q->whereRaw("LOWER(status) = 'active'"))
-                )
-                ->when($filter === 'ongoing', fn ($q) => $q->whereHas('applications.examinations', fn($q) => $q->where('overall_stat', 'NOT DONE')))
-                ->when($filter === 'cleared', fn ($q) => $q->whereHas('applications.examinations', fn($q) => $q->where('overall_stat', 'DONE'))->whereHas('applications.examinations', fn($q) => $q->where('chief_doctor_approval', 'PASSED')))
-                ->when($filter === 'done', fn ($q) => $q->whereHas('applications.examinations', fn($q) => $q->where('overall_stat', 'COMPLETED')))
-                ->when($filter === 'disqualified', fn ($q) => $q->whereHas('applications.examinations', fn($q) => $q->where('chief_doctor_approval', 'FAILED')))
-                ->orderByDesc('patient_id')
-                ->get();
+            $directory = $this->patientTables->fetchDirectoryData([
+                'mode' => 'registrar',
+                'activatedOnly' => true,
+                'inactiveApplications' => $filter === 'archived',
+                'filter' => $filter,
+            ]);
+            $patients = collect();
+            $patientsPayload = $directory['patientsPayload'];
+            $batchOptions = $directory['batchOptions'];
         } catch (\Throwable $e) { \Illuminate\Support\Facades\Log::error($e->getMessage());
             $batches = collect();
             $patients = collect();
+            $patientsPayload = collect();
+            $batchOptions = collect();
             $filter = strtolower(trim($request->query('filter', '')));
         }
 
         $signingDoctors = SigningDoctor::orderBy('name')->get();
         $categoryMap = config('stations.analytics_categories', []);
 
-        return view('registrar.records', compact('patients', 'batches', 'filter', 'categoryMap', 'signingDoctors'));
+        return view('registrar.records', compact('patients', 'patientsPayload', 'batchOptions', 'batches', 'filter', 'categoryMap', 'signingDoctors'));
     }
 
     public function logs(): View

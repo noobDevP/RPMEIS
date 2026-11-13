@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Patient;
+use App\Services\PatientTablePayloadService;
 use App\Support\StationRegistry;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class StationPageController extends Controller
 {
+    public function __construct(
+        private PatientTablePayloadService $patientTables,
+    ) {}
+
     public function show(string $station): View
     {
         $config = StationRegistry::get($station);
@@ -71,16 +75,13 @@ class StationPageController extends Controller
 
         $filter = strtolower(trim($request->query('filter', '')));
 
-        $patients = Patient::query()
-            ->whereHas('applications', fn($q) => $q->whereRaw("LOWER(status) = 'active'"))
-            ->where('is_activated', 1)
-            ->when($filter === 'ongoing', fn ($q) => $q->whereHas('applications.examinations', fn($q) => $q->where('overall_stat', 'NOT DONE')))
-            ->when($filter === 'cleared', fn ($q) => $q->whereHas('applications.examinations', fn($q) => $q->where('overall_stat', 'DONE'))->whereHas('applications.examinations', fn($q) => $q->where('chief_doctor_approval', 'PASSED')))
-            ->when($filter === 'done', fn ($q) => $q->whereHas('applications.examinations', fn($q) => $q->where('overall_stat', 'COMPLETED')))
-            ->when($filter === 'disqualified', fn ($q) => $q->whereHas('applications.examinations', fn($q) => $q->where('chief_doctor_approval', 'FAILED')))
-            ->when($filter === '', fn ($q) => $q->whereHas('applications.examinations', fn($q) => $q->whereNotIn('overall_stat', ['DONE', 'COMPLETED'])))
-            ->orderByDesc('patient_id')
-            ->get();
+        $directory = $this->patientTables->fetchDirectoryData([
+            'mode' => 'station',
+            'activatedOnly' => true,
+            'inactiveApplications' => false,
+            'filter' => $filter,
+            'excludeDoneAndCompletedWhenEmpty' => true,
+        ]);
 
         return view('stations.processed', [
             'station' => $station,
@@ -89,7 +90,9 @@ class StationPageController extends Controller
             'cleanUpdateUrl' => $cleanUpdateUrl,
             'cleanUploadUrl' => $cleanUploadUrl,
             'filter' => $filter,
-            'patients' => $patients,
+            'patients' => collect(),
+            'patientsPayload' => $directory['patientsPayload'],
+            'batchOptions' => $directory['batchOptions'],
         ]);
     }
 }

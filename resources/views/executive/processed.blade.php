@@ -3,135 +3,10 @@
 @section('title', 'Applicant Data - ARO Visayas')
 
 @php
-    $blankPhoto = '/images/blank.jpg';
-
-    $resolveAsset = function ($path) use ($blankPhoto) {
-        $value = trim((string) $path);
-        if ($value === '') return $blankPhoto;
-        if (
-            str_starts_with($value, 'http://') ||
-            str_starts_with($value, 'https://') ||
-            str_starts_with($value, '//') ||
-            str_starts_with($value, '/')
-        ) return $value;
-        return '/' . ltrim($value, '/');
-    };
-
-    $displayOverall = function ($patient) {
-        $chiefApproval = strtoupper(trim((string) $patient->applications->first()?->latestExamination()?->chief_doctor_approval ?? ''));
-        $stat = strtoupper(trim((string) $patient->applications->first()?->latestExamination()?->overall_stat ?? ''));
-        if ($chiefApproval === 'FAILED') return 'Disqualified';
-        if ($stat === 'COMPLETED') return 'Done';
-        if ($stat === 'DONE') return 'Cleared';
-        if ($stat === 'NOT DONE') return 'Ongoing';
-        return 'Pending';
-    };
-
-    $statusClass = function ($patient) {
-        $chiefApproval = strtoupper(trim((string) $patient->applications->first()?->latestExamination()?->chief_doctor_approval ?? ''));
-        $stat = strtoupper(trim((string) $patient->applications->first()?->latestExamination()?->overall_stat ?? ''));
-        if ($chiefApproval === 'FAILED') return 'status-disqualified';
-        if ($stat === 'COMPLETED' || $stat === 'DONE') return 'status-approved';
-        if ($stat === 'NOT DONE') return 'status-pending';
-        return 'status-disqualified';
-    };
-
-    $statusIcon = function ($patient) {
-        $chiefApproval = strtoupper(trim((string) $patient->applications->first()?->latestExamination()?->chief_doctor_approval ?? ''));
-        $stat = strtoupper(trim((string) $patient->applications->first()?->latestExamination()?->overall_stat ?? ''));
-        if ($chiefApproval === 'FAILED') {
-            return '<i class="fas fa-times-circle" style="color: #dc2626;"></i>';
-        }
-        if ($stat === 'COMPLETED' || $stat === 'DONE') {
-            return '<i class="fas fa-circle-check" style="color: #16a34a;"></i>';
-        }
-        return '<i class="fas fa-hourglass-half" style="color: #ca8a04;"></i>';
-    };
-
-    $categoryStatus = function ($value) {
-        $val = strtoupper(trim((string) $value));
-        return match($val) {
-            'GO' => ['text' => 'GO', 'class' => 'status-approved'],
-            'NO GO', 'DQ' => ['text' => 'NO GO', 'class' => 'status-disqualified'],
-            'COMPLIANCE' => ['text' => 'COMPLIANCE', 'class' => 'status-compliance'],
-            'WAITING FOR RESULT' => ['text' => 'WAITING FOR RESULT', 'class' => 'status-compliance'],
-            default => ['text' => 'NOT STARTED', 'class' => 'status-pending'],
-        };
-    };
-
-    $stations = config('stations.stations', []);
-    $patientsPayload = $patients->map(function ($patient) use (
-        $resolveAsset,
-        $displayOverall,
-        $statusClass,
-        $statusIcon,
-        $categoryStatus,
-        $stations
-    ) {
-        $photoUrl = $patient->photo_url ?: $resolveAsset($patient->photo_path ?? null);
-        $displayOverallValue = $displayOverall($patient);
-        $badgeClass = $statusClass($patient);
-        $badgeIcon = $statusIcon($patient);
-
-        $fullName = trim(implode(' ', array_filter([
-            $patient->first_name ?? '',
-            $patient->middle_name ?? '',
-            $patient->last_name ?? '',
-        ]))) ?: 'N/A';
-
-        $stationData = [];
-        foreach ($stations as $key => $config) {
-            $eval = $patient->applications->first()?->latestExamination()?->clearances->where('station.station_key', $key)->first();
-            $approvalVal = $eval ? $eval->approval_status : '';
-            $stationData[$key] = [
-                'label' => $config['label'],
-                'approval' => $approvalVal,
-                'diagnosis' => $eval ? $eval->diagnosis : '',
-                'remarks' => $eval ? $eval->remarks : '',
-                'attachment' => $eval && $eval->attachment ? asset($eval->attachment) : '',
-                'status' => $categoryStatus($approvalVal),
-            ];
-        }
-
-        $chiefApproval = strtoupper(trim((string) $patient->applications->first()?->latestExamination()?->chief_doctor_approval ?? ''));
-        $chiefDoctorStatus = match($chiefApproval) {
-            'PASSED' => ['text' => 'PASSED', 'class' => 'status-approved'],
-            'FAILED' => ['text' => 'FAILED', 'class' => 'status-disqualified'],
-            default => ['text' => 'PENDING', 'class' => 'status-pending'],
-        };
-
-        return [
-            'patient_no' => (string) $patient->patient_id,
-            'firstName' => $patient->first_name ?? '',
-            'middleName' => $patient->middle_name ?? '',
-            'lastName' => $patient->last_name ?? '',
-            'full_name' => $fullName,
-            'birthdate' => $patient->birthdate ?? '',
-            'sex' => $patient->sex ?? '',
-            'batch' => $patient->applications->first()?->batch ?? '',
-            'purpose' => $patient->purpose ?? '',
-            'unitorg' => $patient->serviceRecord?->unit?->unit_name ?? '',
-            'appcode' => $patient->applications->first()?->app_code ?? '',
-            'photo_url' => $photoUrl,
-            'overall_stat' => $patient->applications->first()?->latestExamination()?->overall_stat ?? '',
-            'chief_doctor_approval' => $patient->applications->first()?->latestExamination()?->chief_doctor_approval ?? '',
-            'display_status' => $displayOverallValue,
-            'status_badge_label' => $displayOverallValue,
-            'status_badge_class' => $badgeClass,
-            'status_badge_icon' => $badgeIcon,
-            'stations' => $stationData,
-            'chief_doctor' => [
-                'status' => $chiefDoctorStatus,
-                'diagnosis' => $patient->doctors_diagnosis ?? '',
-                'remarks' => $patient->doctors_remarks ?? '',
-            ],
-            'medical_form_id' => $patient->applications->first()?->latestExamination()?->examination_id,
-            'medical_form_exists' => $patient->applications->first()?->latestExamination() !== null,
-            'all_assessments_completed' => $patient->applications->first()?->latestExamination()?->allAssessmentsCompleted() ?? false,
-        ];
-    })->values();
-
-    $batchOptions = $patientsPayload->pluck('batch')->filter()->unique()->sort()->values();
+    if (!isset($patientsPayload, $batchOptions)) {
+        ['patientsPayload' => $patientsPayload, 'batchOptions' => $batchOptions] = app(\App\Services\PatientTablePayloadService::class)
+            ->buildDirectoryData($patients, ['mode' => 'executive']);
+    }
 @endphp
 
 @section('sidebar-nav')
@@ -156,38 +31,48 @@
 
 @section('content')
 <div class="card" style="padding: 24px;">
-    <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 24px; flex-wrap: wrap;">
-        <div style="flex: 1; min-width: 140px;">
-            <label style="display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Record Type</label>
-            <select id="recordTypeFilter" class="select-modern" style="width: 100%;">
-                <option value="0" {{ !($archive ?? false) ? 'selected' : '' }}>Active</option>
-                <option value="1" {{ ($archive ?? false) ? 'selected' : '' }}>Archived</option>
-            </select>
+    <div class="patient-filters-toolbar">
+        <div class="toolbar-title">
+            <i class="fas fa-users" style="color: var(--primary);"></i>
+            <span>Applicant Entries</span>
         </div>
-        <div style="flex: 1; min-width: 180px;">
-            <label style="display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Batch Filter</label>
-            <select id="globalBatchFilter" class="select-modern" style="width: 100%;">
-                <option value="All">All</option>
-                @foreach ($batchOptions as $batch)
-                    <option value="{{ $batch }}">{{ $batch }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div style="flex: 1; min-width: 180px;">
-            <label style="display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Status Filter</label>
-            <select id="queueStatusFilter" class="select-modern" style="width: 100%;">
-                <option value="All">All</option>
-                <option value="Ongoing" {{ $filter === 'ongoing' ? 'selected' : '' }}>Ongoing</option>
-                <option value="Cleared" {{ $filter === 'cleared' ? 'selected' : '' }}>Cleared</option>
-                <option value="Done" {{ $filter === 'done' ? 'selected' : '' }}>Done</option>
-                <option value="Disqualified" {{ $filter === 'disqualified' ? 'selected' : '' }}>Disqualified</option>
-            </select>
-        </div>
-        <div style="flex: 2; min-width: 240px;">
-            <label style="display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Search Applicant</label>
-            <div style="position: relative;">
-                <i class="fas fa-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
-                <input type="text" id="searchInput" class="input-modern" style="padding-left: 40px; width: 100%;" placeholder="Name, Code, or Batch">
+        @include('partials.patient-filters-toggle', ['targetId' => 'executiveFilters', 'storageKey' => 'executive_processed'])
+    </div>
+
+    <div id="executiveFilters" class="filter-collapsible-body is-collapsed" data-filter-body>
+        <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 20px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 140px;">
+                <label style="display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Record Type</label>
+                <select id="recordTypeFilter" class="select-modern" style="width: 100%;">
+                    <option value="0" {{ !($archive ?? false) ? 'selected' : '' }}>Active</option>
+                    <option value="1" {{ ($archive ?? false) ? 'selected' : '' }}>Archived</option>
+                </select>
+            </div>
+            <div style="flex: 1; min-width: 180px;">
+                <label style="display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Batch Filter</label>
+                <select id="globalBatchFilter" class="select-modern" style="width: 100%;">
+                    <option value="All">All</option>
+                    @foreach ($batchOptions as $batch)
+                        <option value="{{ $batch }}">{{ $batch }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div style="flex: 1; min-width: 180px;">
+                <label style="display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Status Filter</label>
+                <select id="queueStatusFilter" class="select-modern" style="width: 100%;">
+                    <option value="All">All</option>
+                    <option value="Ongoing" {{ $filter === 'ongoing' ? 'selected' : '' }}>Ongoing</option>
+                    <option value="Cleared" {{ $filter === 'cleared' ? 'selected' : '' }}>Cleared</option>
+                    <option value="Done" {{ $filter === 'done' ? 'selected' : '' }}>Done</option>
+                    <option value="Disqualified" {{ $filter === 'disqualified' ? 'selected' : '' }}>Disqualified</option>
+                </select>
+            </div>
+            <div style="flex: 2; min-width: 240px;">
+                <label style="display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Search Applicant</label>
+                <div style="position: relative;">
+                    <i class="fas fa-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                    <input type="text" id="searchInput" class="input-modern" style="padding-left: 40px; width: 100%;" placeholder="Name, Code, or Batch">
+                </div>
             </div>
         </div>
     </div>

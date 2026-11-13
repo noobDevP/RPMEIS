@@ -82,16 +82,24 @@ class Patient extends Model
     }
 
     // --- Legacy Helpers (Virtual attributes for API/JS backward compatibility) ---
-    public function getApplicantNoAttribute() { return $this->applications()->latest()->first()?->applicant_no; }
+    protected function latestApplication(): ?Application
+    {
+        if ($this->relationLoaded('applications')) {
+            return $this->applications->sortByDesc('application_id')->first();
+        }
+
+        return $this->applications()->latest('application_id')->first();
+    }
+
+    public function getApplicantNoAttribute() { return $this->latestApplication()?->applicant_no; }
     public function getPatientNoAttribute() { return $this->patient_id; }
-    public function getOverallStatAttribute() { return $this->applications()->latest()->first()?->latestExamination()?->overall_stat ?? 'NOT DONE'; }
-    public function getAppcodeAttribute() { return $this->applications()->latest()->first()?->app_code; }
-    public function getBatchAttribute() { return $this->applications()->latest()->first()?->batch; }
-    public function getPurposeAttribute() { return $this->applications()->latest()->first()?->purpose; }
+    public function getOverallStatAttribute() { return $this->latestApplication()?->latestExamination()?->overall_stat ?? 'NOT DONE'; }
+    public function getAppcodeAttribute() { return $this->latestApplication()?->app_code; }
+    public function getBatchAttribute() { return $this->latestApplication()?->batch; }
+    public function getPurposeAttribute() { return $this->latestApplication()?->purpose; }
     public function getMedicalFormAttribute(): ?MedicalExamination
     {
-        $app = $this->relationLoaded('applications') ? $this->applications->first() : $this->applications()->latest()->first();
-        return $app?->latestExamination();
+        return $this->latestApplication()?->latestExamination();
     }
     public function getDoctorsDiagnosisAttribute(): string
     {

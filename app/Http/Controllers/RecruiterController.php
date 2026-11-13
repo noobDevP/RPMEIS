@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Patient;
+use App\Services\PatientTablePayloadService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class RecruiterController extends Controller
 {
+    public function __construct(
+        private PatientTablePayloadService $patientTables,
+    ) {}
+
     public function index(): View
     {
         return view('recruiter.index');
@@ -18,24 +22,18 @@ class RecruiterController extends Controller
         try {
             $filter = strtolower(trim($request->query('filter', '')));
 
-            $query = Patient::query()
-                ->whereHas('applications', fn($q) => $q->whereRaw("LOWER(status) = 'active'"))
-                ->when($filter === 'ongoing', fn ($q) => $q->whereHas('applications.examinations', fn($q) => $q->where('overall_stat', 'NOT DONE')))
-                ->when($filter === 'cleared', fn ($q) => $q->whereHas('applications.examinations', fn($q) => $q->where('overall_stat', 'DONE')))
-                ->when($filter === 'done', fn ($q) => $q->whereHas('applications.examinations', fn($q) => $q->where('overall_stat', 'COMPLETED')))
-                ->when($filter === 'unactivated', fn ($q) => $q->where('is_activated', 0))
-                ->when($filter === 'disqualified', fn ($q) => $q->where(function ($sq) {
-                    $sq->whereHas('applications.examinations', fn($q) => $q->where('chief_doctor_approval', 'FAILED'))
-                        ->orWhereHas('applications.examinations.clearances', function ($eq) {
-                            $eq->where('approval_status', 'NO GO');
-                        });
-                }));
-
-            if ($request->filled('batch') && $request->get('batch') !== 'ALL') {
-                $query->whereHas('applications', fn($q) => $q->where('batch', $request->get('batch')));
-            }
-
-            $patients = $query->orderBy('patient_id')->get();
+            $directory = $this->patientTables->fetchDirectoryData([
+                'mode' => 'recruiter',
+                'activatedOnly' => false,
+                'inactiveApplications' => false,
+                'filter' => $filter,
+                'batch' => $request->filled('batch') ? (string) $request->get('batch') : null,
+                'order' => 'asc',
+                'recruiterDisqualifiedMode' => true,
+            ]);
+            $patients = collect();
+            $patientsPayload = $directory['patientsPayload'];
+            $batchOptions = $directory['batchOptions'];
 
             $batches = \App\Models\Application::query()
                 ->whereNotNull('batch')
@@ -45,10 +43,13 @@ class RecruiterController extends Controller
                 ->pluck('batch');
         } catch (\Throwable) {
             $patients = collect();
+            $patientsPayload = collect();
+            $batchOptions = collect();
             $batches = collect();
+            $filter = strtolower(trim($request->query('filter', '')));
         }
 
-        return view('recruiter.processed', compact('patients', 'batches', 'filter'));
+        return view('recruiter.processed', compact('patients', 'patientsPayload', 'batchOptions', 'batches', 'filter'));
     }
 
     public function scanner(): View

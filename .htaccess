@@ -13,8 +13,8 @@
     RewriteRule ^robots\.txt$ public/index.php [L]
 
     # Block bare directory requests from triggering Apache mod_dir redirect inflation
-    RewriteRule ^(images|uploads|blank|tutorial|js|css|public)/?$ - [F,L]
-    RewriteRule ^public/(images|uploads|blank|tutorial|js|css)/?$ - [F,L]
+    RewriteRule ^(images|uploads|blank|tutorial|js|css|public|vendor)/?$ - [F,L]
+    RewriteRule ^public/(images|uploads|blank|tutorial|js|css|vendor)/?$ - [F,L]
 
     # Discard query strings on static assets to prevent scanners from fuzzing static file versions
     RewriteCond %{QUERY_STRING} .
@@ -27,8 +27,8 @@
 </IfModule>
 
 <IfModule mod_headers.c>
-    # Server-generated errors bypass Laravel's nonce-based policy.
-    Header always set Content-Security-Policy "default-src 'none'; script-src 'none'; style-src 'none'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'" "expr=%{REQUEST_STATUS} >= 400"
+    # Server-generated redirects/errors bypass Laravel's nonce-based policy.
+    Header always set Content-Security-Policy "default-src 'none'; script-src 'none'; style-src 'none'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'" "expr=%{REQUEST_STATUS} >= 300"
 
     # Security headers for root requests & static fallback (set on both tables for 200 OK and error responses)
     Header set X-Content-Type-Options "nosniff"
@@ -53,8 +53,8 @@
 
     # Restrict CORS headers to application origin on static assets to prevent Cross-Domain Misconfiguration
     <FilesMatch "\.(png|jpe?g|gif|ico|svg|webp|js|css|xml|txt)$">
-        Header set Access-Control-Allow-Origin "https://lawngreen-lyrebird-493319.hostingersite.com"
-        Header always set Access-Control-Allow-Origin "https://lawngreen-lyrebird-493319.hostingersite.com"
+        Header set Access-Control-Allow-Origin "https://rpm-is.com"
+        Header always set Access-Control-Allow-Origin "https://rpm-is.com"
         Header set Access-Control-Allow-Methods "GET, OPTIONS"
         Header always set Access-Control-Allow-Methods "GET, OPTIONS"
     </FilesMatch>

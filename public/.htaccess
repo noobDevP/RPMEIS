@@ -21,10 +21,9 @@
     RewriteCond %{HTTP:x-xsrf-token} .
     RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
 
-    # Redirect Trailing Slashes If Not A Folder...
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_URI} (.+)/$
-    RewriteRule ^ %1 [L,R=301]
+    # Do not issue Apache-level trailing-slash 301 redirects here: root .htaccess
+    # rewrites requests internally to /public/*, so %1 would expose /public/... and
+    # emit Apache's 795-byte 301 body without Laravel's CSP headers.
 
     # Block bare directory requests from triggering Apache mod_dir redirect inflation
     RewriteRule ^(images|uploads|blank|tutorial|js|css|public|vendor)/?$ - [F,L]
@@ -44,8 +43,8 @@
 </IfModule>
 
 <IfModule mod_headers.c>
-    # Server-generated errors bypass Laravel's nonce-based policy.
-    Header always set Content-Security-Policy "default-src 'none'; script-src 'none'; style-src 'none'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'" "expr=%{REQUEST_STATUS} >= 400"
+    # Server-generated redirects/errors bypass Laravel's nonce-based policy.
+    Header always set Content-Security-Policy "default-src 'none'; script-src 'none'; style-src 'none'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'" "expr=%{REQUEST_STATUS} >= 300"
 
     # Security headers applied to all responses (including static files like images and robots.txt)
     Header set X-Content-Type-Options "nosniff"
@@ -70,8 +69,8 @@
 
     # Restrict CORS headers to application origin on static assets to prevent Cross-Domain Misconfiguration
     <FilesMatch "\.(png|jpe?g|gif|ico|svg|webp|js|css|xml|txt)$">
-        Header set Access-Control-Allow-Origin "https://lawngreen-lyrebird-493319.hostingersite.com"
-        Header always set Access-Control-Allow-Origin "https://lawngreen-lyrebird-493319.hostingersite.com"
+        Header set Access-Control-Allow-Origin "https://rpm-is.com"
+        Header always set Access-Control-Allow-Origin "https://rpm-is.com"
         Header set Access-Control-Allow-Methods "GET, OPTIONS"
         Header always set Access-Control-Allow-Methods "GET, OPTIONS"
     </FilesMatch>

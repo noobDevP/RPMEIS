@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /storage/
 Disallow: /api/
-Sitemap: https://lawngreen-lyrebird-493319.hostingersite.com/sitemap.xml
+Sitemap: https://rpm-is.com/sitemap.xml

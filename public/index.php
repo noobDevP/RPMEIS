@@ -13,7 +13,7 @@ if (empty($_SERVER['HTTPS']) || strtolower($_SERVER['HTTPS']) === 'off') {
         }
 
         header_remove('X-Powered-By');
-        header('Location: https://lawngreen-lyrebird-493319.hostingersite.com'.$target, true, 301);
+        header('Location: https://rpm-is.com'.$target, true, 301);
         header("Content-Security-Policy: default-src 'none'; script-src 'none'; style-src 'none'; frame-ancestors 'none'; form-action 'none'; base-uri 'none'");
         header('X-Content-Type-Options: nosniff');
         header('Content-Length: 0');

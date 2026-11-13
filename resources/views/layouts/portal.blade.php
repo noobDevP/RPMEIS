@@ -7,7 +7,7 @@
     <title>@yield('title', 'RPMEIS Portal')</title>
     <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/all.min.css') }}">
     @stack('styles')
-    <link rel="stylesheet" href="{{ asset('css/portal-layout.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/portal-layout.css') }}?v={{ @filemtime(public_path('css/portal-layout.css')) ?: 1 }}">
 </head>
 <body>
     <header class="top-nav">
@@ -183,7 +183,7 @@
 
     @include('partials.analytics-chart-modal')
 
-    <script src="{{ asset('js/portal-layout.js') }}" defer></script>
+    <script src="{{ asset('js/portal-layout.js') }}?v={{ @filemtime(public_path('js/portal-layout.js')) ?: 1 }}" defer></script>
     @stack('scripts')
 </body>
 </html>

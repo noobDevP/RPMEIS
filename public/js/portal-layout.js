@@ -79,8 +79,9 @@ function syncFilterBadge(btn, panel) {
     }
 }
 
-function setFilterPanelOpen(btn, panel, open, persist = true) {
+function setFilterPanelOpen(btn, panel, open) {
     panel.classList.toggle('is-collapsed', !open);
+    panel.style.display = open ? '' : 'none';
     btn.classList.toggle('is-open', open);
     btn.setAttribute('aria-expanded', open ? 'true' : 'false');
 
@@ -88,22 +89,13 @@ function setFilterPanelOpen(btn, panel, open, persist = true) {
     if (textEl) {
         textEl.textContent = open ? 'Hide Filters' : 'Filters';
     }
-
-    if (persist) {
-        const storageKey = btn.getAttribute('data-filter-storage');
-        if (storageKey) {
-            try {
-                window.localStorage.setItem('philarmy_filters_open:' + storageKey, open ? '1' : '0');
-            } catch (_) {}
-        }
-    }
 }
 
 function togglePatientFilters(btn) {
     const panel = resolveFilterTarget(btn);
     if (!panel) return;
-    const isCurrentlyOpen = !panel.classList.contains('is-collapsed');
-    setFilterPanelOpen(btn, panel, !isCurrentlyOpen, true);
+    const isCurrentlyOpen = !panel.classList.contains('is-collapsed') && panel.style.display !== 'none';
+    setFilterPanelOpen(btn, panel, !isCurrentlyOpen);
 }
 
 function initCollapsibleFilters() {
@@ -111,15 +103,7 @@ function initCollapsibleFilters() {
         const panel = resolveFilterTarget(btn);
         if (!panel) return;
 
-        let initialOpen = false;
-        const storageKey = btn.getAttribute('data-filter-storage');
-        if (storageKey) {
-            try {
-                initialOpen = window.localStorage.getItem('philarmy_filters_open:' + storageKey) === '1';
-            } catch (_) {}
-        }
-
-        setFilterPanelOpen(btn, panel, initialOpen, false);
+        setFilterPanelOpen(btn, panel, false);
         syncFilterBadge(btn, panel);
 
         panel.addEventListener('change', () => syncFilterBadge(btn, panel));

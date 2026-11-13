@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\ImportExportController;
+use App\Http\Controllers\Api\LegacySyncWebhookController;
 use App\Http\Controllers\Api\LogController;
 use App\Http\Controllers\Api\PatientController;
 use App\Http\Controllers\Api\PdfController;
@@ -10,6 +11,17 @@ use App\Http\Controllers\Api\PhotoController;
 use App\Http\Controllers\Api\PlaceController;
 use App\Http\Controllers\Api\StationController;
 use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Real-Time Legacy Sync Webhook (/api/legacy-sync/webhook)
+|--------------------------------------------------------------------------
+|
+| Stateless HMAC-SHA256 authenticated receiver pushed from philarmy-lab.com.
+|
+*/
+Route::post('/legacy-sync/webhook', [LegacySyncWebhookController::class, 'handle'])
+    ->name('legacy-sync.webhook');
 
 /*
 |--------------------------------------------------------------------------

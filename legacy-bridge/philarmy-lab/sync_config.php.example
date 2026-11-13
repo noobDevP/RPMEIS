@@ -1,0 +1,33 @@
+<?php
+
+/**
+ * Legacy-to-RPMIS Live Sync Configuration (Template)
+ *
+ * Upload this file as "sync_config.php" in the public_html/ root of philarmy-lab.com
+ * and set "secret" to match PHILARMYLAB_LEGACY_SECRET in rpm-is.com's .env file.
+ */
+return [
+    'secret' => 'REPLACE_WITH_SHARED_SECRET',
+    'rpmis_webhook_url' => 'https://rpm-is.com/api/legacy-sync/webhook',
+    'enable_webhook' => true,
+    'tolerance_seconds' => 300,
+    'connect_timeout_ms' => 1500,
+    'timeout_ms' => 3000,
+    'allowed_upload_dirs' => [
+        'uploads/patients/',
+        'uploads/dental_attachments/',
+        'uploads/optha_dental_attachments/',
+        'uploads/ecg_xray_attachments/',
+        'uploads/lab_drugtest_attachments/',
+        'uploads/np_attachments/',
+        'uploads/np_neuro_attachments/',
+        'uploads/gpe_attachments/',
+        'dental_attachment/',
+        'optha_eent_attachment/',
+        'ecg_xray_attachment/',
+        'lab_drugtest_attachment/',
+        'np_neuro_attachment/',
+        'gpe_attachment/',
+        'profile_pic/',
+    ],
+];

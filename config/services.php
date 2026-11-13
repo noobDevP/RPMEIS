@@ -45,4 +45,12 @@ return [
         'secret' => env('PME_SYNC_SECRET', 'philarmy-pme-secure-token-2026'),
     ],
 
+    'philarmylab_legacy' => [
+        'url' => rtrim((string) env('PHILARMYLAB_LEGACY_URL', 'https://philarmy-lab.com'), '/'),
+        'endpoint' => '/' . ltrim((string) env('PHILARMYLAB_LEGACY_ENDPOINT', 'api_sync_export.php'), '/'),
+        'secret' => (string) env('PHILARMYLAB_LEGACY_SECRET', ''),
+        'webhook_tolerance_seconds' => (int) env('PHILARMYLAB_LEGACY_TOLERANCE', 300),
+        'timeout' => (int) env('PHILARMYLAB_LEGACY_TIMEOUT', 20),
+    ],
+
 ];

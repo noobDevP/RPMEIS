@@ -5,6 +5,11 @@
 
     RewriteEngine On
 
+    # Block direct client requests containing /public prefix (root .htaccess rewrite rules
+    # are bypassed once Apache resolves into public/.htaccess).
+    RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /+public(?:/|\s|\?|$) [NC]
+    RewriteRule ^ - [F,L]
+
     # Let PHP emit a bodyless HTTPS redirect before Laravel or static files are served.
     RewriteCond %{HTTPS} off
     RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1|\[::1\])(:[0-9]+)?$ [NC]
@@ -45,6 +50,7 @@
 <IfModule mod_headers.c>
     # Server-generated redirects/errors bypass Laravel's nonce-based policy.
     Header always set Content-Security-Policy "default-src 'none'; script-src 'none'; style-src 'none'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'" "expr=%{REQUEST_STATUS} >= 300"
+    Header always set Cache-Control "no-store, no-cache, must-revalidate, max-age=0" "expr=%{REQUEST_STATUS} >= 300"
 
     # Security headers applied to all responses (including static files like images and robots.txt)
     Header set X-Content-Type-Options "nosniff"

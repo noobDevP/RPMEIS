@@ -13,6 +13,8 @@ use Illuminate\View\View;
 
 class LoginController extends Controller
 {
+    use RendersFailedLogin;
+
     public function __construct(
         private StaffAuthService $staffAuth
     ) {}
@@ -39,7 +41,7 @@ class LoginController extends Controller
         return view('auth.login');
     }
 
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(LoginRequest $request): RedirectResponse|Response
     {
         $user = $this->staffAuth->authenticate(
             $request->username(),
@@ -47,25 +49,11 @@ class LoginController extends Controller
         );
 
         if (! $user) {
-            $username = (string) $request->input('username', '');
-            $safeInput = (!str_contains($username, '/') && !str_contains($username, '\\') && !str_contains($username, '..'))
-                ? ['username' => $username]
-                : [];
-
-            return back()
-                ->withInput($safeInput)
-                ->withErrors(['login' => 'Invalid username or password.']);
+            return $this->failedLoginResponse($request, 'auth.login', 'Invalid username or password.');
         }
 
         if (! $user->isActive()) {
-            $username = (string) $request->input('username', '');
-            $safeInput = (!str_contains($username, '/') && !str_contains($username, '\\') && !str_contains($username, '..'))
-                ? ['username' => $username]
-                : [];
-
-            return back()
-                ->withInput($safeInput)
-                ->withErrors(['login' => 'Account is inactive. Contact admin.']);
+            return $this->failedLoginResponse($request, 'auth.login', 'Account is inactive. Contact admin.');
         }
 
         

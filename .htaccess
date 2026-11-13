@@ -1,3 +1,7 @@
+<IfModule mod_dir.c>
+    DirectorySlash Off
+</IfModule>
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
@@ -29,6 +33,7 @@
 <IfModule mod_headers.c>
     # Server-generated redirects/errors bypass Laravel's nonce-based policy.
     Header always set Content-Security-Policy "default-src 'none'; script-src 'none'; style-src 'none'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'" "expr=%{REQUEST_STATUS} >= 300"
+    Header always set Cache-Control "no-store, no-cache, must-revalidate, max-age=0" "expr=%{REQUEST_STATUS} >= 300"
 
     # Security headers for root requests & static fallback (set on both tables for 200 OK and error responses)
     Header set X-Content-Type-Options "nosniff"

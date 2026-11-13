@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers\Admin\Auth;
 
+use App\Http\Controllers\Auth\RendersFailedLogin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\AdminLoginRequest;
 use App\Services\Auth\AdminAuthService;
 
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 
 class LoginController extends Controller
 {
+    use RendersFailedLogin;
+
     public function __construct(
         private AdminAuthService $adminAuth
     ) {}
@@ -24,7 +28,7 @@ class LoginController extends Controller
         return view('admin.auth.login');
     }
 
-    public function store(AdminLoginRequest $request): RedirectResponse
+    public function store(AdminLoginRequest $request): RedirectResponse|Response
     {
         $admin = $this->adminAuth->authenticate(
             $request->username(),
@@ -32,14 +36,7 @@ class LoginController extends Controller
         );
 
         if (! $admin) {
-            $username = (string) $request->input('username', '');
-            $safeInput = (!str_contains($username, '/') && !str_contains($username, '\\') && !str_contains($username, '..'))
-                ? ['username' => $username]
-                : [];
-
-            return back()
-                ->withInput($safeInput)
-                ->withErrors(['login' => 'Invalid username or password!']);
+            return $this->failedLoginResponse($request, 'admin.auth.login', 'Invalid username or password!');
         }
 
         

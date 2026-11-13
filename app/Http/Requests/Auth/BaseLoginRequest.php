@@ -24,6 +24,7 @@ abstract class BaseLoginRequest extends FormRequest
                 'string',
                 'max:50',
                 'regex:/^[a-zA-Z0-9_\-\.\@\s]+$/',
+                'not_regex:/\.\./',
             ],
             'password' => [
                 'required',

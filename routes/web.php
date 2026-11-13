@@ -17,8 +17,33 @@ use App\Http\Controllers\ApprovingAuthorityController;
 use App\Http\Controllers\StationPageController;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 use App\Http\Controllers\Auth\TwoFactorController;
+
+Route::get('/media/{path}', function (string $path) {
+    $cleaned = str_replace('\\', '/', ltrim(trim($path), '/'));
+    if ($cleaned === '' || str_contains($cleaned, '..') || str_contains($cleaned, "\0")) {
+        abort(404);
+    }
+
+    $disk = Storage::disk('public');
+    if ($disk->exists($cleaned)) {
+        return $disk->response($cleaned, null, [
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
+    }
+
+    $publicRoot = realpath(public_path());
+    $publicCandidate = realpath(public_path($cleaned));
+    if ($publicRoot !== false && $publicCandidate !== false && str_starts_with($publicCandidate, $publicRoot . DIRECTORY_SEPARATOR) && is_file($publicCandidate)) {
+        return response()->file($publicCandidate, [
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
+    }
+
+    abort(404);
+})->where('path', '.*')->name('media.show');
 
 Route::get('/robots.txt', function () {
     $content = "User-agent: *\n";

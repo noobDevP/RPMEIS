@@ -140,14 +140,17 @@ class Patient extends Model
             return '/' . $cleaned;
         }
 
-        // 2. File in storage/app/public/
-        if (file_exists(storage_path('app/public/' . $cleaned))) {
-            return '/storage/' . $cleaned;
+        // 2. File in storage/app/public/ (served via /media/ to bypass .htaccess /storage/ block)
+        if (str_starts_with($cleaned, 'storage/')) {
+            $stripped = substr($cleaned, 8);
+            if ($stripped !== '' && file_exists(storage_path('app/public/' . $stripped))) {
+                return '/media/' . $stripped;
+            }
+            return '/media/' . $stripped;
         }
 
-        // 3. Path already starts with storage/
-        if (str_starts_with($cleaned, 'storage/')) {
-            return '/' . $cleaned;
+        if (file_exists(storage_path('app/public/' . $cleaned))) {
+            return '/media/' . $cleaned;
         }
 
         return '/' . $cleaned;

@@ -13,6 +13,7 @@ use App\Models\StationClearance;
 use App\Models\Unit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PatientTableOptimizationTest extends TestCase
@@ -85,6 +86,34 @@ class PatientTableOptimizationTest extends TestCase
             $response->assertSee('id="searchInput"', false);
             $this->assertLessThanOrEqual(20, $queryCount, "Too many SQL queries on {$portal['route']}");
         }
+    }
+
+    public function test_synced_patient_photos_resolve_via_media_route_not_blocked_storage_prefix(): void
+    {
+        Storage::fake('public');
+        Storage::disk('public')->put('uploads/patients/patient_555.jpg', 'fake-jpg-bytes');
+
+        $this->seedPatients(1, startOffset: 555);
+        $patient = Patient::query()->orderByDesc('patient_id')->firstOrFail();
+        $patient->profile()->updateOrCreate(
+            ['patient_id' => $patient->patient_id],
+            ['photo_path' => 'uploads/patients/patient_555.jpg']
+        );
+
+        $this->withSession([
+            'staff.logged_in' => true,
+            'staff.role' => 'DOCTOR',
+            'staff.display_name' => 'Chief Doctor',
+        ]);
+
+        $response = $this->get(route('doctor.index'));
+        $response->assertOk();
+        $response->assertSee('\/media\/uploads\/patients\/patient_555.jpg', false);
+
+        $mediaResponse = $this->get('/media/uploads/patients/patient_555.jpg');
+        $mediaResponse->assertOk();
+
+        $this->get('/media/../.env')->assertNotFound();
     }
 
     private function measureQueries(callable $callback): int

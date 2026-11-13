@@ -662,10 +662,12 @@ class PatientTablePayloadService
             return $this->photoUrlCache[$path] = '/images/blank.jpg';
         }
 
+        $publicStorageRoot = $this->publicStorageRoot();
+
         if (str_starts_with($cleaned, 'storage/')) {
             $stripped = substr($cleaned, 8);
-            if ($this->cachedFileExists(storage_path('app/public'), $stripped)) {
-                return $this->photoUrlCache[$path] = '/' . $cleaned;
+            if ($stripped !== '' && $this->cachedFileExists($publicStorageRoot, $stripped)) {
+                return $this->photoUrlCache[$path] = '/media/' . $stripped;
             }
         }
 
@@ -673,8 +675,8 @@ class PatientTablePayloadService
             return $this->photoUrlCache[$path] = '/' . $cleaned;
         }
 
-        if ($this->cachedFileExists(storage_path('app/public'), $cleaned)) {
-            return $this->photoUrlCache[$path] = '/storage/' . $cleaned;
+        if ($this->cachedFileExists($publicStorageRoot, $cleaned)) {
+            return $this->photoUrlCache[$path] = '/media/' . $cleaned;
         }
 
         return $this->photoUrlCache[$path] = '/images/blank.jpg';
@@ -770,6 +772,11 @@ class PatientTablePayloadService
         return $this->assetBaseUrl;
     }
 
+    protected function publicStorageRoot(): string
+    {
+        return rtrim(\Illuminate\Support\Facades\Storage::disk('public')->path(''), '\\/');
+    }
+
     protected function fastAsset(string $assetBase, string $path): string
     {
         if (
@@ -780,7 +787,12 @@ class PatientTablePayloadService
             return $path;
         }
 
-        return $assetBase . '/' . ltrim($path, '/');
+        $trimmed = ltrim($path, '/');
+        if (str_starts_with($trimmed, 'storage/')) {
+            $trimmed = 'media/' . substr($trimmed, 8);
+        }
+
+        return $assetBase . '/' . $trimmed;
     }
 
     protected function computeAge(?string $birthdate, int $todayY, int $todayMd): ?int

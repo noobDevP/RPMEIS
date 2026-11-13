@@ -78,8 +78,9 @@ class PatientTableOptimizationTest extends TestCase
             $response->assertSee('data-filter-toggle', false);
             $response->assertSee('data-filter-target="' . $portal['toggleTarget'] . '"', false);
             $response->assertSee('id="' . $portal['toggleTarget'] . '" class="filter-collapsible-body is-collapsed"', false);
-            $response->assertSee('portal-layout.css?v=', false);
-            $response->assertSee('portal-layout.js?v=', false);
+            $response->assertDontSee('portal-layout.css?v=', false);
+            $response->assertDontSee('portal-layout.js?v=', false);
+            $response->assertSee('window.__philarmyFiltersBound', false);
             $response->assertSee('id="globalBatchFilter"', false);
             $response->assertSee('id="searchInput"', false);
             $this->assertLessThanOrEqual(20, $queryCount, "Too many SQL queries on {$portal['route']}");

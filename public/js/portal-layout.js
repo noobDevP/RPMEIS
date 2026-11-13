@@ -34,82 +34,8 @@ document.addEventListener('DOMContentLoaded', function () {
             closeLayoutPasswordModal();
             return;
         }
-        const filterToggle = e.target.closest('[data-filter-toggle]');
-        if (filterToggle) {
-            e.preventDefault();
-            togglePatientFilters(filterToggle);
-            return;
-        }
     });
-
-    initCollapsibleFilters();
 });
-
-function resolveFilterTarget(btn) {
-    const targetId = btn.getAttribute('data-filter-target');
-    return targetId ? document.getElementById(targetId) : null;
-}
-
-function countActiveFilters(panel) {
-    if (!panel) return 0;
-    let count = 0;
-
-    panel.querySelectorAll('select').forEach(select => {
-        const val = (select.value || '').trim();
-        if (val !== '' && val !== 'All' && val !== 'ALL' && val !== '0') {
-            count++;
-        }
-    });
-
-    panel.querySelectorAll('input[type="text"], input[type="search"]').forEach(input => {
-        if ((input.value || '').trim() !== '') {
-            count++;
-        }
-    });
-
-    return count;
-}
-
-function syncFilterBadge(btn, panel) {
-    const badge = btn.querySelector('[data-filter-count]');
-    const activeCount = countActiveFilters(panel);
-    btn.classList.toggle('has-active-filters', activeCount > 0);
-    if (badge) {
-        badge.textContent = String(activeCount);
-    }
-}
-
-function setFilterPanelOpen(btn, panel, open) {
-    panel.classList.toggle('is-collapsed', !open);
-    panel.style.display = open ? '' : 'none';
-    btn.classList.toggle('is-open', open);
-    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-
-    const textEl = btn.querySelector('[data-filter-toggle-label]');
-    if (textEl) {
-        textEl.textContent = open ? 'Hide Filters' : 'Filters';
-    }
-}
-
-function togglePatientFilters(btn) {
-    const panel = resolveFilterTarget(btn);
-    if (!panel) return;
-    const isCurrentlyOpen = !panel.classList.contains('is-collapsed') && panel.style.display !== 'none';
-    setFilterPanelOpen(btn, panel, !isCurrentlyOpen);
-}
-
-function initCollapsibleFilters() {
-    document.querySelectorAll('[data-filter-toggle]').forEach(btn => {
-        const panel = resolveFilterTarget(btn);
-        if (!panel) return;
-
-        setFilterPanelOpen(btn, panel, false);
-        syncFilterBadge(btn, panel);
-
-        panel.addEventListener('change', () => syncFilterBadge(btn, panel));
-        panel.addEventListener('input', () => syncFilterBadge(btn, panel));
-    });
-}
 
 function openLayoutPasswordModal(e) { 
     if (e && typeof e.preventDefault === 'function') e.preventDefault();

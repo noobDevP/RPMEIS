@@ -12,6 +12,11 @@ if (defined('PHILARMYLAB_SYNC_HOOK_REGISTERED')) {
 }
 define('PHILARMYLAB_SYNC_HOOK_REGISTERED', true);
 
+$host = $host ?? ($GLOBALS['host'] ?? '');
+$username = $username ?? ($GLOBALS['username'] ?? '');
+$password = $password ?? ($GLOBALS['password'] ?? '');
+$database = $database ?? ($GLOBALS['database'] ?? '');
+
 (static function () use ($host, $username, $password, $database): void {
     if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
         return;

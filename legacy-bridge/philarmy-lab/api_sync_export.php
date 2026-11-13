@@ -98,9 +98,71 @@ if ($resource !== 'patients') {
     exit;
 }
 
+ob_start();
 include __DIR__ . '/config.php';
+if (ob_get_level() > 0) {
+    ob_end_clean();
+}
 
 header('Content-Type: application/json; charset=utf-8');
+
+$jsonFlags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE;
+$respondJson = static function (array $payload, int $statusCode = 200) use ($jsonFlags): void {
+    $encoded = json_encode($payload, $jsonFlags);
+    if ($encoded === false) {
+        http_response_code(500);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'JSON encoding failed: ' . json_last_error_msg(),
+        ]);
+        exit;
+    }
+
+    http_response_code($statusCode);
+    echo $encoded;
+    exit;
+};
+
+$fetchStmtRows = static function (mysqli_stmt $stmt): array {
+    if (method_exists($stmt, 'get_result')) {
+        $res = $stmt->get_result();
+        $out = [];
+        if ($res) {
+            while ($r = $res->fetch_assoc()) {
+                $out[] = $r;
+            }
+        }
+
+        return $out;
+    }
+
+    $stmt->store_result();
+    $meta = $stmt->result_metadata();
+    if (! $meta) {
+        return [];
+    }
+
+    $fields = $meta->fetch_fields();
+    $meta->free();
+    $row = [];
+    $refs = [];
+    foreach ($fields as $f) {
+        $row[$f->name] = null;
+        $refs[] = &$row[$f->name];
+    }
+    call_user_func_array([$stmt, 'bind_result'], $refs);
+
+    $out = [];
+    while ($stmt->fetch()) {
+        $copy = [];
+        foreach ($row as $k => $v) {
+            $copy[$k] = $v;
+        }
+        $out[] = $copy;
+    }
+
+    return $out;
+};
 
 $patientNo = isset($_GET['patient_no']) && ctype_digit((string) $_GET['patient_no']) ? (int) $_GET['patient_no'] : null;
 $afterPatientNo = isset($_GET['after_patient_no']) && ctype_digit((string) $_GET['after_patient_no']) ? (int) $_GET['after_patient_no'] : 0;
@@ -109,20 +171,22 @@ $since = isset($_GET['since']) ? trim((string) $_GET['since']) : '';
 
 if ($patientNo !== null) {
     $stmt = $conn->prepare('SELECT * FROM patient_data WHERE patient_no = ? LIMIT 1');
+    if (! $stmt) {
+        $conn->close();
+        $respondJson(['status' => 'error', 'message' => 'Query prepare failed.'], 500);
+    }
     $stmt->bind_param('i', $patientNo);
     $stmt->execute();
-    $res = $stmt->get_result();
-    $row = $res ? $res->fetch_assoc() : null;
+    $rows = $fetchStmtRows($stmt);
     $stmt->close();
     $conn->close();
 
-    echo json_encode([
+    $respondJson([
         'status' => 'ok',
-        'count' => $row ? 1 : 0,
+        'count' => count($rows),
         'has_more' => false,
-        'patients' => $row ? [$row] : [],
-    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-    exit;
+        'patients' => $rows,
+    ]);
 }
 
 $fetchLimit = $limit + 1;
@@ -142,21 +206,23 @@ if ($since !== '' && preg_match('/^\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}:\d{2})?$/
             ORDER BY patient_no ASC
             LIMIT ?";
     $stmt = $conn->prepare($sql);
+    if (! $stmt) {
+        $conn->close();
+        $respondJson(['status' => 'error', 'message' => 'Query prepare failed.'], 500);
+    }
     $stmt->bind_param('isi', $afterPatientNo, $sinceNormalized, $fetchLimit);
 } else {
     $sql = 'SELECT * FROM patient_data WHERE patient_no > ? ORDER BY patient_no ASC LIMIT ?';
     $stmt = $conn->prepare($sql);
+    if (! $stmt) {
+        $conn->close();
+        $respondJson(['status' => 'error', 'message' => 'Query prepare failed.'], 500);
+    }
     $stmt->bind_param('ii', $afterPatientNo, $fetchLimit);
 }
 
 $stmt->execute();
-$result = $stmt->get_result();
-$rows = [];
-if ($result) {
-    while ($row = $result->fetch_assoc()) {
-        $rows[] = $row;
-    }
-}
+$rows = $fetchStmtRows($stmt);
 $stmt->close();
 $conn->close();
 
@@ -165,9 +231,9 @@ if ($hasMore) {
     array_pop($rows);
 }
 
-echo json_encode([
+$respondJson([
     'status' => 'ok',
     'count' => count($rows),
     'has_more' => $hasMore,
     'patients' => $rows,
-], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+]);

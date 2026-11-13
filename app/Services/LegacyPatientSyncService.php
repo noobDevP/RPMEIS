@@ -793,9 +793,12 @@ class LegacyPatientSyncService
             throw new RuntimeException("Legacy API request failed ({$response->status()}): " . $response->body());
         }
 
-        $json = $response->json();
+        $body = ltrim($response->body(), "\xEF\xBB\xBF\r\n\t ");
+        $json = json_decode($body, true);
         if (! is_array($json)) {
-            throw new RuntimeException('Legacy API returned invalid JSON.');
+            $preview = mb_substr($body, 0, 350);
+            $jsonErr = json_last_error_msg();
+            throw new RuntimeException("Legacy API returned invalid JSON (HTTP {$response->status()}, {$jsonErr}): {$preview}");
         }
 
         return $json;
